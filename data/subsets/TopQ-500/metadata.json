@@ -1,0 +1,27 @@
+{
+  "name": "TopQ-500",
+  "description": "Top 500 by composite_score from resolved pool (32,161)",
+  "purpose": "Quality filter validation",
+  "selection_criteria": "Top composite_score (resolved pool)",
+  "expected_size": 500,
+  "actual_size": 500,
+  "stats": {
+    "mean_Q": 0.7323953643170775,
+    "median_Q": 0.7270335663257752,
+    "std_Q": 0.021163440974299542,
+    "min_Q": 0.7076443287527974,
+    "max_Q": 0.8219239933188744,
+    "mean_tokens": 32143.246,
+    "median_tokens": 29804.5,
+    "mean_turns": 44.334,
+    "submit_rate": 0.982,
+    "resolved_rate": 1.0,
+    "unique_repos": 177,
+    "mean_efficiency_score": 0.8662009132648705,
+    "mean_style_score": 0.5985898153692846,
+    "mean_b2_error_retry": 0.8992,
+    "mean_b3_step_count_ratio": 0.833201826529741,
+    "mean_c2_action_diversity": 0.7041883892408862,
+    "mean_c3_observation_utilization": 0.492991241497683
+  }
+}

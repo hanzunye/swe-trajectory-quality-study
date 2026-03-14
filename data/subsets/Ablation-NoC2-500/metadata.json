@@ -1,0 +1,29 @@
+{
+  "name": "Ablation-NoC2-500",
+  "description": "Top 500 with Style = C3 alone (drop C2 action_diversity)",
+  "purpose": "Ablation study",
+  "selection_criteria": "Top 500 with Style = C3 alone (drop C2 action_diversity)",
+  "expected_size": 500,
+  "actual_size": 500,
+  "stats": {
+    "mean_Q": 0.7227949631822859,
+    "median_Q": 0.7219466910985499,
+    "std_Q": 0.030633730496217846,
+    "min_Q": 0.6308153984041016,
+    "max_Q": 0.8219239933188744,
+    "mean_tokens": 33176.158,
+    "median_tokens": 30880.5,
+    "mean_turns": 49.486,
+    "submit_rate": 0.984,
+    "resolved_rate": 1.0,
+    "unique_repos": 144,
+    "mean_efficiency_score": 0.8275860542128503,
+    "mean_style_score": 0.6180038721517215,
+    "mean_b2_error_retry": 0.8404,
+    "mean_b3_step_count_ratio": 0.8147721084257006,
+    "mean_c2_action_diversity": 0.6779701178596239,
+    "mean_c3_observation_utilization": 0.5580376264438192,
+    "mean_ablation_score": 0.6928118403283348,
+    "median_ablation_score": 0.6851612767568023
+  }
+}

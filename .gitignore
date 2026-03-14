@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Data (large files - use HuggingFace for full datasets)
+*.safetensors
+*.bin
+*.pt
+*.cache.pt
+*.jsonl
+!data/eval_results/*.json
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Training outputs (large - use HuggingFace)
+Training/outputs/*/checkpoint-*/
+*.safetensors

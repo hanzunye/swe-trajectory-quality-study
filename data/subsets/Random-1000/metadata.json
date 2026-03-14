@@ -1,0 +1,21 @@
+{
+  "name": "Random-1000",
+  "description": "1000 random trajectories from all 67,074 (no filtering)",
+  "purpose": "Scale baseline",
+  "selection_criteria": "Random sample (all trajectories)",
+  "expected_size": 1000,
+  "actual_size": 1000,
+  "stats": {
+    "mean_Q": 0.7822237999271031,
+    "median_Q": 0.7856677953983859,
+    "std_Q": 0.10480124458541658,
+    "min_Q": 0.5287698946265955,
+    "max_Q": 0.9527288776407661,
+    "mean_tokens": 48190.793,
+    "median_tokens": 45776.0,
+    "mean_turns": 64.478,
+    "submit_rate": 0.897,
+    "resolved_rate": 0.47,
+    "unique_repos": 560
+  }
+}

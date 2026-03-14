@@ -1,0 +1,29 @@
+{
+  "name": "Ablation-NoEfficiency-500",
+  "description": "Top 500 by Style score only (no Efficiency component)",
+  "purpose": "Ablation study",
+  "selection_criteria": "Top 500 by Style score only (no Efficiency component)",
+  "expected_size": 500,
+  "actual_size": 500,
+  "stats": {
+    "mean_Q": 0.6165001072205905,
+    "median_Q": 0.6071542241832221,
+    "std_Q": 0.08997721295554005,
+    "min_Q": 0.455569445211077,
+    "max_Q": 0.8219239933188744,
+    "mean_tokens": 40618.32,
+    "median_tokens": 36659.0,
+    "mean_turns": 63.098,
+    "submit_rate": 0.84,
+    "resolved_rate": 1.0,
+    "unique_repos": 165,
+    "mean_efficiency_score": 0.5635097475195172,
+    "mean_style_score": 0.6694904669216637,
+    "mean_b2_error_retry": 0.3512,
+    "mean_b3_step_count_ratio": 0.7758194950390346,
+    "mean_c2_action_diversity": 0.6989860819461939,
+    "mean_c3_observation_utilization": 0.6399948518971336,
+    "mean_ablation_score": 0.6694904669216637,
+    "median_ablation_score": 0.6632304038493008
+  }
+}

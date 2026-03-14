@@ -1,0 +1,15 @@
+{
+  "experiment": "exp8",
+  "subset": "Ablation-NoEfficiency-500",
+  "hypothesis": "Ablation: Style score only (drop Efficiency group)",
+  "base_model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "final_step": 126,
+  "final_epoch": 2.0,
+  "train_loss": 0.059453256546504914,
+  "total_steps": 126,
+  "lora_rank": 64,
+  "learning_rate": 2e-05,
+  "context_length": 32768,
+  "loss_masking": "assistant_only",
+  "num_examples": 500
+}

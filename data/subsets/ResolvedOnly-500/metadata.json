@@ -1,0 +1,27 @@
+{
+  "name": "ResolvedOnly-500",
+  "description": "500 random from resolved pool (32,161 gate-passing)",
+  "purpose": "Resolved-only filter baseline",
+  "selection_criteria": "Random sample (resolved pool only)",
+  "expected_size": 500,
+  "actual_size": 500,
+  "stats": {
+    "mean_Q": 0.5214230226971293,
+    "median_Q": 0.5161562289490431,
+    "std_Q": 0.0800931989344118,
+    "min_Q": 0.350360332864608,
+    "max_Q": 0.7520261230385501,
+    "mean_tokens": 42430.35,
+    "median_tokens": 39619.5,
+    "mean_turns": 58.588,
+    "submit_rate": 0.966,
+    "resolved_rate": 1.0,
+    "unique_repos": 335,
+    "mean_efficiency_score": 0.5520039490163522,
+    "mean_style_score": 0.49084209637790627,
+    "mean_b2_error_retry": 0.30939999999999995,
+    "mean_b3_step_count_ratio": 0.7946078980327044,
+    "mean_c2_action_diversity": 0.6573581625184267,
+    "mean_c3_observation_utilization": 0.324326030237386
+  }
+}

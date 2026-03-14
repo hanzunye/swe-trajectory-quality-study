@@ -1,0 +1,7 @@
+# Phase 2: Subset Construction
+# Shares most dependencies with Phase 1 (maclocal/)
+pandas>=2.2.0
+numpy>=1.26.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+tqdm>=4.66.0

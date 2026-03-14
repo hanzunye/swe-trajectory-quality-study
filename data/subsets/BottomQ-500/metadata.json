@@ -1,0 +1,27 @@
+{
+  "name": "BottomQ-500",
+  "description": "Bottom 500 by composite_score (sanity check)",
+  "purpose": "Sanity check (worst quality)",
+  "selection_criteria": "Bottom composite_score (resolved pool)",
+  "expected_size": 500,
+  "actual_size": 500,
+  "stats": {
+    "mean_Q": 0.3689770088979869,
+    "median_Q": 0.37211775568260425,
+    "std_Q": 0.012039730306268972,
+    "min_Q": 0.3173437692248486,
+    "max_Q": 0.3827414578863812,
+    "mean_tokens": 58119.426,
+    "median_tokens": 57003.5,
+    "mean_turns": 77.49,
+    "submit_rate": 0.944,
+    "resolved_rate": 1.0,
+    "unique_repos": 171,
+    "mean_efficiency_score": 0.3448023159109905,
+    "mean_style_score": 0.3931517018849833,
+    "mean_b2_error_retry": 0.0045999999999999965,
+    "mean_b3_step_count_ratio": 0.685004631821981,
+    "mean_c2_action_diversity": 0.6047318482785785,
+    "mean_c3_observation_utilization": 0.181571555491388
+  }
+}

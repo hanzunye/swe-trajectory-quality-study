@@ -1,0 +1,21 @@
+{
+  "name": "Random-500",
+  "description": "500 random trajectories from all 67,074 (no filtering)",
+  "purpose": "Baseline",
+  "selection_criteria": "Random sample (all trajectories)",
+  "expected_size": 500,
+  "actual_size": 500,
+  "stats": {
+    "mean_Q": 0.7889875257228939,
+    "median_Q": 0.7960542676088574,
+    "std_Q": 0.10193186105322571,
+    "min_Q": 0.532036003443245,
+    "max_Q": 0.9523588217995598,
+    "mean_tokens": 46780.454,
+    "median_tokens": 44455.5,
+    "mean_turns": 63.964,
+    "submit_rate": 0.916,
+    "resolved_rate": 0.496,
+    "unique_repos": 331
+  }
+}

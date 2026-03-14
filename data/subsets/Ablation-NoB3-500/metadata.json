@@ -1,0 +1,29 @@
+{
+  "name": "Ablation-NoB3-500",
+  "description": "Top 500 with Efficiency = B2 alone (drop B3 step_count_ratio)",
+  "purpose": "Ablation study",
+  "selection_criteria": "Top 500 with Efficiency = B2 alone (drop B3 step_count_ratio)",
+  "expected_size": 500,
+  "actual_size": 500,
+  "stats": {
+    "mean_Q": 0.725274741378983,
+    "median_Q": 0.7233081284115164,
+    "std_Q": 0.02867869758093398,
+    "min_Q": 0.6418392558138502,
+    "max_Q": 0.8219239933188744,
+    "mean_tokens": 33295.216,
+    "median_tokens": 30728.0,
+    "mean_turns": 46.588,
+    "submit_rate": 0.992,
+    "resolved_rate": 1.0,
+    "unique_repos": 178,
+    "mean_efficiency_score": 0.8732891947041053,
+    "mean_style_score": 0.5772602880538606,
+    "mean_b2_error_retry": 0.9396000000000001,
+    "mean_b3_step_count_ratio": 0.8069783894082105,
+    "mean_c2_action_diversity": 0.6953708447224674,
+    "mean_c3_observation_utilization": 0.45914973138525395,
+    "mean_ablation_score": 0.7584301440269303,
+    "median_ablation_score": 0.7511510559987182
+  }
+}
