@@ -196,16 +196,6 @@ bash scripts/training/run_experiments.sh
 bash scripts/evaluation/run_pipeline.sh
 ```
 
-## Citation
-
-```bibtex
-@inproceedings{anonymous2026quantity,
-  title={Data Quantity Dominates Quality in {LoRA} Fine-Tuning for Code Agents: A Systematic Study on Trajectory Data Filtering Strategies},
-  author={Anonymous},
-  booktitle={Proceedings of the International Conference on Intelligent Computing (ICIC)},
-  year={2026}
-}
-```
 
 ## License
 
