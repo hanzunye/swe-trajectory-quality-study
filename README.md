@@ -260,17 +260,6 @@ python scripts/evaluation/eval_first_action.py \
 python scripts/evaluation/eval_first_action.py --plot-only
 ```
 
-## Citation
-
-```bibtex
-@inproceedings{anonymous2026quantity,
-  title={Data Quantity Dominates Quality in {LoRA} Fine-Tuning for Code Agents},
-  author={Anonymous},
-  booktitle={ICIC},
-  year={2026}
-}
-```
-
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
