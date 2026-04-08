@@ -1,0 +1,20 @@
+{
+  "action_type_acc": {
+    "spearman_rho": NaN,
+    "p_value": NaN,
+    "n": 4,
+    "interpretation": "strong positive"
+  },
+  "file_match_score": {
+    "spearman_rho": -0.19999999999999998,
+    "p_value": 0.8,
+    "n": 4,
+    "interpretation": "weak"
+  },
+  "rouge_l": {
+    "spearman_rho": -1.0,
+    "p_value": 0.0,
+    "n": 4,
+    "interpretation": "strong negative"
+  }
+}

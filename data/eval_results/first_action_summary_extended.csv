@@ -1,0 +1,4 @@
+model,display_name,ce_loss,n_evaluated,n_skipped,action_type_acc,file_match_score,rouge_l,exact_match_acc,action_type_dist_pred,action_type_dist_gt
+exp14,Random-2000,0.3870867758303064,100,0,0.07,0.6075,0.3516132955103077,0.0,"{'text': 0.67, 'edit': 0.27, 'bash': 0.06}","{'tool_call_other': 0.82, 'edit': 0.18}"
+exp15,TopQ-2000,0.3731861719018916,100,0,0.04,0.46,0.3101657443105651,0.0,"{'text': 0.64, 'edit': 0.25, 'bash': 0.11}","{'tool_call_other': 0.82, 'edit': 0.18}"
+exp16,B2Only-500,0.4714096684487545,100,0,0.0,0.69,0.19829594140446866,0.0,{'text': 1.0},"{'tool_call_other': 0.82, 'edit': 0.18}"

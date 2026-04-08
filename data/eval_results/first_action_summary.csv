@@ -1,0 +1,5 @@
+model,ce_loss,n_evaluated,n_skipped,action_type_acc,file_match_score,rouge_l,exact_match_acc,action_type_dist_pred,action_type_dist_gt
+baseline,0.910048451627224,96,4,0.0,0.5729166666666666,0.137117061855502,0.0,{'text': 1.0},"{'tool_call_other': 0.823, 'edit': 0.177}"
+exp1,0.4737033679668303,100,0,0.0,0.68,0.19987581291669268,0.0,{'text': 1.0},"{'tool_call_other': 0.82, 'edit': 0.18}"
+exp3,0.470403361973263,100,0,0.0,0.67,0.2119127507926033,0.0,{'text': 1.0},"{'tool_call_other': 0.82, 'edit': 0.18}"
+exp2,0.4139761367094032,100,0,0.0,0.65,0.2484113193372717,0.0,"{'text': 0.99, 'bash': 0.01}","{'tool_call_other': 0.82, 'edit': 0.18}"
