@@ -16,11 +16,9 @@ In the 500–2000 trajectory regime, **data quantity effects (~12.7% relative lo
 
 | Resource | Link | Description |
 |----------|------|-------------|
-| Quality-Scored Subsets | [huggingface.co/datasets/YOUR_USERNAME/swe-trajectory-quality-subsets](https://huggingface.co/datasets/YOUR_USERNAME/swe-trajectory-quality-subsets) | 16 curated training subsets with quality scores |
-| LoRA Adapters | [huggingface.co/YOUR_USERNAME/swe-trajectory-lora-adapters](https://huggingface.co/YOUR_USERNAME/swe-trajectory-lora-adapters) | 16 trained LoRA adapters (Qwen2.5-Coder-7B) |
-| Evaluation Results | [huggingface.co/datasets/YOUR_USERNAME/swe-trajectory-eval-results](https://huggingface.co/datasets/YOUR_USERNAME/swe-trajectory-eval-results) | Perplexity, next-action & first-action results |
-
-> Replace `YOUR_USERNAME` with your actual HuggingFace username before publishing.
+| Quality-Scored Subsets | [huggingface.co/datasets/davongluck/swe-trajectory-quality-subsets](https://huggingface.co/datasets/davongluck/swe-trajectory-quality-subsets) | 16 curated training subsets with quality scores |
+| LoRA Adapters | [huggingface.co/davongluck/swe-trajectory-lora-adapters](https://huggingface.co/davongluck/swe-trajectory-lora-adapters) | 16 trained LoRA adapters (Qwen2.5-Coder-7B) |
+| Evaluation Results | [huggingface.co/datasets/davongluck/swe-trajectory-eval-results](https://huggingface.co/datasets/davongluck/swe-trajectory-eval-results) | Perplexity, next-action & first-action results |
 
 ## Project Structure
 
