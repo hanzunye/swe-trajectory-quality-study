@@ -14,7 +14,10 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-from subset_config import OUTPUT_ROOT
+try:
+    from .subset_config import OUTPUT_ROOT
+except ImportError:
+    from subset_config import OUTPUT_ROOT
 
 logger = logging.getLogger(__name__)
 sns.set_theme(style="whitegrid", font_scale=1.1)
@@ -23,11 +26,14 @@ sns.set_theme(style="whitegrid", font_scale=1.1)
 SUBSET_COLORS = {
     "Random-500":          "#95a5a6",
     "Random-1000":         "#7f8c8d",
+    "Random-2000":         "#5d6d7e",
     "TopQ-500":            "#2ecc71",
     "TopQ-1000":           "#27ae60",
+    "TopQ-2000":           "#1e8449",
     "ResolvedOnly-500":    "#3498db",
     "ResolvedOnly-1000":   "#2980b9",
     "BottomQ-500":         "#e74c3c",
+    "B2Only-Top500":       "#8e44ad",
 }
 ABLATION_COLOR = "#9b59b6"
 DEFAULT_COLOR  = "#4C72B0"
