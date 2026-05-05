@@ -52,7 +52,7 @@ Block 3 — Sub-Dimension Ablation (4 experiments)
   NoB2-500, NoB3-500, NoC2-500, NoC3-500
 
 Block 4 — Supplementary (3 experiments, added in revision)
-  Random-2000, TopQ-2000, B2Only-500
+  Random-2000, TopQ-2000, B2Only-Top500
 ```
 
 ### Main Results
@@ -146,17 +146,41 @@ Hardware: NVIDIA A100 80GB GPU (PyTorch 2.4.0, CUDA 12.4.1)
 ### Step 1: Quality Scoring
 
 ```bash
-python scripts/scoring/run_analysis.py \
-    --input /path/to/swe-trajectory-dataset \
-    --output data/quality_scores/
+python scripts/scoring/run_analysis.py
 ```
+
+This writes the Phase 1 outputs to `data/quality_scores/full/`, including:
+- `trajectory_stats.jsonl` for all trajectories
+- `trajectory_scored_v3.csv` for the resolved, gate-passing scoring pool
 
 ### Step 2: Subset Construction
 
 ```bash
-python scripts/subset/run_subset.py \
-    --scores data/quality_scores/trajectory_scored_v3.csv \
-    --output data/subsets/
+python scripts/subset/run_subset.py
+```
+
+By default this builds all 16 training subsets into `data/subsets/`, including:
+- Core subsets: `Random-{500,1000}`, `TopQ-{500,1000}`, `ResolvedOnly-{500,1000}`, `BottomQ-500`
+- Ablations: `Ablation-NoEfficiency-500`, `Ablation-NoStyle-500`, `Ablation-NoB2-500`, `Ablation-NoB3-500`, `Ablation-NoC2-500`, `Ablation-NoC3-500`
+- Supplementary subsets: `Random-2000`, `TopQ-2000`, `B2Only-Top500`
+
+Useful subset commands:
+
+```bash
+# List all available subset names
+python scripts/subset/run_subset.py --list
+
+# Build one subset only
+python scripts/subset/run_subset.py --only TopQ-2000
+
+# Skip comparison plots
+python scripts/subset/run_subset.py --skip-viz
+```
+
+If your scoring outputs live outside the default location, point the subset builder at them with:
+
+```bash
+SCORING_ROOT=/path/to/quality_scores/full python scripts/subset/run_subset.py
 ```
 
 ### Step 3: Training
@@ -231,7 +255,7 @@ swe-trajectory-quality-study/
 │   │   └── trajectory_analysis.csv
 │   │
 │   ├── subsets/                         # 16 training subsets (metadata.json each)
-│   │   └── {TopQ,Random,ResolvedOnly,BottomQ,Ablation-*}-{500,1000,2000}/
+│   │   └── {TopQ,Random,ResolvedOnly,BottomQ,Ablation-*}-{500,1000,2000}/ + B2Only-Top500/
 │   │
 │   ├── training_logs/
 │   │   └── exp{1..16}_summary.json
