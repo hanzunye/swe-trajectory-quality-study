@@ -18,17 +18,29 @@ import logging
 from collections import Counter
 from dataclasses import dataclass, field
 
-import tiktoken
-
-from .config import (
-    TIKTOKEN_ENCODING, TEST_KEYWORDS,
-    B1_WINDOW_SIZE, B2_ERROR_KEYWORDS, C1_NOISE_PATTERNS, C3_FILE_EXTENSIONS,
-)
+try:
+    from .scoring_config import (
+        TIKTOKEN_ENCODING,
+        TEST_KEYWORDS,
+        B1_WINDOW_SIZE,
+        B2_ERROR_KEYWORDS,
+        C1_NOISE_PATTERNS,
+        C3_FILE_EXTENSIONS,
+    )
+except ImportError:
+    from scoring_config import (
+        TIKTOKEN_ENCODING,
+        TEST_KEYWORDS,
+        B1_WINDOW_SIZE,
+        B2_ERROR_KEYWORDS,
+        C1_NOISE_PATTERNS,
+        C3_FILE_EXTENSIONS,
+    )
 
 logger = logging.getLogger(__name__)
 
 # Lazy-init global encoder (thread-safe, reuse across calls)
-_encoder: tiktoken.Encoding | None = None
+_encoder = None
 
 # Pre-compiled regex for C3 filename extraction
 _C3_FILE_RE = re.compile(
@@ -42,9 +54,10 @@ _C3_ERROR_CLASS_RE = re.compile(r'\b\w+(?:Error|Exception|Warning)\b')
 _C1_NOISE_LOWER = [p.lower() for p in C1_NOISE_PATTERNS]
 
 
-def _get_encoder() -> tiktoken.Encoding:
+def _get_encoder():
     global _encoder
     if _encoder is None:
+        import tiktoken
         _encoder = tiktoken.get_encoding(TIKTOKEN_ENCODING)
     return _encoder
 

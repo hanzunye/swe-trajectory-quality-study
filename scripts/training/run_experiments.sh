@@ -23,14 +23,17 @@
 # ============================================================
 set -euo pipefail
 
-WORKSPACE="${WORKSPACE:-/workspace}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+WORKSPACE="${WORKSPACE:-${REPO_ROOT}}"
 CHECKPOINT_DIR="${WORKSPACE}/checkpoints"
 OUTPUT_DIR="${WORKSPACE}/outputs"
 STATUS_FILE="${WORKSPACE}/experiment_status.json"
 
 # Optional: local Subset/output/ directory for trajectory IDs
 SUBSET_DIR="${SUBSET_DIR:-}"
+export WORKSPACE
+[ -n "$SUBSET_DIR" ] && export SUBSET_DIR
 
 # Ordered experiment list
 ALL_EXPERIMENTS=(exp1 exp2 exp3 exp4 exp5 exp6 exp7 exp8 exp9 exp10 exp11 exp12 exp13 exp14 exp15 exp16)
@@ -116,7 +119,11 @@ for exp in "${ALL_EXPERIMENTS[@]}"; do
     DATA_DIR="${WORKSPACE}/data/${SUBSET}"
     if [ ! -d "$DATA_DIR" ] || [ ! -f "${DATA_DIR}/dataset_info.json" ]; then
         log "  Preparing data for subset: ${SUBSET}"
-        python3 "${SCRIPT_DIR}/prepare_data.py" --subset "$SUBSET"
+        PREPARE_ARGS=(--subset "$SUBSET")
+        if [ -n "$SUBSET_DIR" ]; then
+            PREPARE_ARGS+=(--subset-dir "$SUBSET_DIR")
+        fi
+        python3 "${SCRIPT_DIR}/prepare_data.py" "${PREPARE_ARGS[@]}"
     else
         log "  Data already prepared: ${SUBSET}"
     fi

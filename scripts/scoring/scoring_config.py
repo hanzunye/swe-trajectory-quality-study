@@ -1,12 +1,13 @@
 """
 Configuration for M2 Mac (16GB RAM) optimized processing.
 """
+import os
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-OUTPUT_ROOT = PROJECT_ROOT / "output"
-OUTPUT_ROOT.mkdir(exist_ok=True)
+REPO_ROOT = Path(__file__).resolve().parents[2]
+OUTPUT_ROOT = Path(os.environ.get("SCORING_OUTPUT_ROOT", REPO_ROOT / "data" / "quality_scores"))
+OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def get_output_dir(limit: int | None = None) -> Path:

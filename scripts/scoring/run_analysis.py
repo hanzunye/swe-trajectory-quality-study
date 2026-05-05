@@ -30,30 +30,39 @@ Experiment groups (11 total, --export-splits):
 import argparse
 import json
 import logging
+import os
 import time
 import sys
 from pathlib import Path
 
 import pandas as pd
 import psutil
+from datasets import load_dataset
 from tqdm import tqdm
 
-# Quality_Scoring is CWD; src/ lives directly underneath
 _here = Path(__file__).resolve().parent
 sys.path.insert(0, str(_here))
 
-from src.config import get_output_dir, BATCH_SIZE
-from src.loader import load_streaming
-from src.analysis import analyze_trajectory
-from src.scoring import (
-    composite_quality_score,
-    passes_gate,
-    compute_per_task_medians,
-    new_quality_score,
-    b1_redundant_commands, b2_error_retry, b3_step_count_ratio,
-    c1_observation_cleanliness, c2_action_diversity, c3_observation_utilization,
+from scoring_config import (
+    DATASET_NAME,
+    DATASET_SPLIT,
+    GATE_MIN_TRUNCATION_RATIO,
+    MODEL_CONTEXT_WINDOW,
+    STREAMING,
+    get_output_dir,
 )
-from src.visualize import generate_all_plots
+from analysis import TrajectoryStats, analyze_trajectory
+from scoring import (
+    composite_quality_score,
+    compute_per_task_medians,
+    b1_redundant_commands,
+    b2_error_retry,
+    b3_step_count_ratio,
+    c1_observation_cleanliness,
+    c2_action_diversity,
+    c3_observation_utilization,
+)
+from scoring_visualize import generate_all_plots
 
 logging.basicConfig(
     level=logging.INFO,
@@ -61,6 +70,21 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("pipeline")
+
+
+def load_streaming(skip_n: int = 0):
+    """Load the raw trajectory dataset as an iterable stream."""
+    stream = load_dataset(DATASET_NAME, split=DATASET_SPLIT, streaming=STREAMING)
+    if skip_n:
+        stream = stream.skip(skip_n)
+    return stream
+
+
+def close_stream(stream) -> None:
+    """Close a streaming dataset if the object exposes a close method."""
+    close = getattr(stream, "close", None)
+    if callable(close):
+        close()
 
 
 def log_memory():
@@ -132,7 +156,7 @@ def run_analysis(
                 _analyze_stream(stream, records, jsonl_f,
                                 limit=remaining, initial_offset=skip_n)
             finally:
-                stream.close()
+                close_stream(stream)
         logger.info("Analysis complete: %d trajectories total.", len(records))
         log_memory()
     else:
@@ -145,7 +169,7 @@ def run_analysis(
             try:
                 _analyze_stream(stream, records, jsonl_f, limit=limit)
             finally:
-                stream.close()
+                close_stream(stream)
         logger.info("Analysis complete: %d trajectories processed.", len(records))
         log_memory()
 
@@ -155,7 +179,6 @@ def run_analysis(
     logger.info("Building DataFrame...")
     df = pd.DataFrame(records)
 
-    from src.config import MODEL_CONTEXT_WINDOW, GATE_MIN_TRUNCATION_RATIO
     if "truncation_ratio" in df.columns:
         tr_col = df["truncation_ratio"]
     else:
@@ -176,8 +199,6 @@ def run_analysis(
     per_task_median = compute_per_task_medians(df)
 
     logger.info("Computing v3 scores for %d gate-passing trajectories...", n_pass)
-
-    from src.analysis import TrajectoryStats
 
     def _score_row_v3(row: pd.Series) -> pd.Series:
         """Reconstruct v3 scores from stored raw metrics. No re-streaming needed."""

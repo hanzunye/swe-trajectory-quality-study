@@ -18,6 +18,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
 # ── 颜色 ──────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
@@ -29,13 +32,14 @@ log_step()  { echo -e "\n${BLUE}━━━━━━━━━━━━━━━━
               echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"; }
 
 # ── 默认配置 ─────────────────────────────────────────────────────────────
-WORKSPACE="${WORKSPACE:-/workspace}"
-EVAL_SCRIPT_DIR="${EVAL_SCRIPT_DIR:-$WORKSPACE/eval}"
+WORKSPACE="${WORKSPACE:-$REPO_ROOT}"
+EVAL_SCRIPT_DIR="${EVAL_SCRIPT_DIR:-$SCRIPT_DIR}"
 ONLY_STEP=""
 SKIP_STEP1=false
 MODELS_OVERRIDE=""
 SCORES_REPO=""   # HF质量得分repo（可选）
 SCORES_FILE=""   # 本地质量得分文件（可选）
+export WORKSPACE
 
 # ── 参数解析 ─────────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -130,7 +134,7 @@ should_run_step() { [ -z "$ONLY_STEP" ] || [ "$ONLY_STEP" = "$1" ]; }
 if should_run_step 1; then
     log_step "1/4" "构建测试集 (Gold / Random / Low-Q)"
 
-    if [ "$SKIP_STEP1" = true ] && [ -f "$WORKSPACE/eval_data/test_set_ids.json" ]; then
+    if [ "$SKIP_STEP1" = true ] && [ -f "$WORKSPACE/data/eval_data/test_set_ids.json" ]; then
         log_info "测试集已存在，跳过Step 1"
     else
         STEP1_ARGS=""
@@ -142,7 +146,7 @@ if should_run_step 1; then
 
         # 验证输出
         for split in gold random low_q; do
-            count=$(wc -l < "$WORKSPACE/eval_data/${split}.jsonl" 2>/dev/null || echo 0)
+            count=$(wc -l < "$WORKSPACE/data/eval_data/${split}.jsonl" 2>/dev/null || echo 0)
             log_info "  [${split}] ${count} 条轨迹"
             if [ "$count" -lt 100 ]; then
                 log_warn "  [${split}] 轨迹数量不足100，请检查数据源"
@@ -175,11 +179,11 @@ if should_run_step 2; then
     log_info "Step 2 完成 ✓  耗时: $((ELAPSED/3600))h $((ELAPSED%3600/60))m"
 
     # 快速预览结果
-    if [ -f "$WORKSPACE/eval_results/perplexity_results.csv" ]; then
+    if [ -f "$WORKSPACE/data/eval_results/perplexity_results.csv" ]; then
         log_info "Perplexity结果预览:"
         python3 -c "
 import pandas as pd
-df = pd.read_csv('$WORKSPACE/eval_results/perplexity_results.csv')
+df = pd.read_csv('$WORKSPACE/data/eval_results/perplexity_results.csv')
 pivot = df.pivot_table(values='mean_loss', index='model', columns='split')
 print(pivot.round(4).to_string())
 "
@@ -211,20 +215,20 @@ fi
 if should_run_step 4; then
     log_step "4/4" "统计分析与可视化"
 
-    if [ ! -f "$WORKSPACE/eval_results/perplexity_results.json" ]; then
+    if [ ! -f "$WORKSPACE/data/eval_results/perplexity_results.json" ]; then
         log_error "找不到 perplexity_results.json，请先完成Step 2"
         exit 1
     fi
 
     python3 analyze_results.py \
-        --results "$WORKSPACE/eval_results/perplexity_results.json"
+        --results "$WORKSPACE/data/eval_results/perplexity_results.json"
 
     log_info "Step 4 完成 ✓"
 
     # 列出所有输出文件
     log_info "生成的文件:"
-    ls -lh "$WORKSPACE/eval_results/figures/" 2>/dev/null || true
-    ls -lh "$WORKSPACE/eval_results/"*.{json,csv,md} 2>/dev/null || true
+    ls -lh "$WORKSPACE/data/eval_results/figures/" 2>/dev/null || true
+    ls -lh "$WORKSPACE/data/eval_results/"*.{json,csv,md} 2>/dev/null || true
 fi
 
 
@@ -234,7 +238,7 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}  评估流水线完成!${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 echo ""
-log_info "结果目录: $WORKSPACE/eval_results/"
+log_info "结果目录: $WORKSPACE/data/eval_results/"
 log_info "  perplexity_results.json  — 完整数据（含per-trajectory losses）"
 log_info "  perplexity_results.csv   — 汇总表格"
 log_info "  stats_report.md          — 统计检验报告"

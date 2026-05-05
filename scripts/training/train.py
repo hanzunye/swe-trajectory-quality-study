@@ -48,7 +48,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── Paths ────────────────────────────────────────────────
-WORKSPACE = Path(os.environ.get("WORKSPACE", "/workspace"))
+WORKSPACE = Path(os.environ.get("WORKSPACE", Path(__file__).resolve().parents[2]))
 DATA_DIR = WORKSPACE / "data"
 CHECKPOINT_DIR = WORKSPACE / "checkpoints"
 OUTPUT_DIR = WORKSPACE / "outputs"

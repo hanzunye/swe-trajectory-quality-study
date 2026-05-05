@@ -39,8 +39,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── 路径配置 ──────────────────────────────────────────────────────────────
-WORKSPACE   = Path(os.environ.get("WORKSPACE", "/workspace"))
-RESULTS_DIR = WORKSPACE / "eval_results"
+WORKSPACE   = Path(os.environ.get("WORKSPACE", Path(__file__).resolve().parents[2]))
+RESULTS_DIR = WORKSPACE / "data" / "eval_results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 
 # 模型标签（用于图表显示）— v3 实验设计

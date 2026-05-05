@@ -42,9 +42,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── 路径配置 ──────────────────────────────────────────────────────────────
-WORKSPACE    = Path(os.environ.get("WORKSPACE", Path(__file__).parent))
-EVAL_DATA    = WORKSPACE / "eval_data"
-OUTPUT_DIR   = WORKSPACE / "eval_results"
+WORKSPACE    = Path(os.environ.get("WORKSPACE", Path(__file__).resolve().parents[2]))
+DATA_ROOT    = WORKSPACE / "data"
+EVAL_DATA    = DATA_ROOT / "eval_data"
+OUTPUT_DIR   = DATA_ROOT / "eval_results"
 OUTPUTS_ROOT = WORKSPACE / "outputs"   # LoRA adapter存放处
 
 # ── A100 80GB推理配置 ──────────────────────────────────────────────────────
@@ -222,9 +223,14 @@ def load_test_split(split_name: str, tokenizer) -> list[dict]:
     # ── 命中缓存：直接加载 ────────────────────────────────────────────────
     if cache_path.exists() and cache_path.stat().st_mtime >= jsonl_path.stat().st_mtime:
         logger.info("[%s] 从缓存加载: %s", split_name, cache_path)
-        samples = torch.load(cache_path, weights_only=False)
-        logger.info("[%s] 缓存命中，加载 %d 条有效轨迹", split_name, len(samples))
-        return samples
+        try:
+            samples = torch.load(cache_path, weights_only=True)
+            if not isinstance(samples, list):
+                raise TypeError(f"unexpected cache type: {type(samples)!r}")
+            logger.info("[%s] 缓存命中，加载 %d 条有效轨迹", split_name, len(samples))
+            return samples
+        except Exception as exc:
+            logger.warning("[%s] 缓存读取失败，重新生成: %s", split_name, exc)
 
     # ── 缓存未命中：并行处理 ──────────────────────────────────────────────
     logger.info("[%s] 未找到缓存，开始并行预处理...", split_name)
