@@ -1,0 +1,27 @@
+{
+  "name": "B2Only-Top500",
+  "description": "Top 500 by B2 (error_retry) alone, no composite (resolved pool, 32,161)",
+  "purpose": "Single-dimension ranking baseline (Experiment C)",
+  "selection_criteria": "Top b2_error_retry (resolved pool)",
+  "expected_size": 500,
+  "actual_size": 500,
+  "stats": {
+    "mean_Q": 0.6971692063241616,
+    "median_Q": 0.690983720043002,
+    "std_Q": 0.04057737165286558,
+    "min_Q": 0.6005169982584078,
+    "max_Q": 0.8219239933188744,
+    "mean_tokens": 33719.75,
+    "median_tokens": 32333.5,
+    "mean_turns": 45.732,
+    "submit_rate": 0.996,
+    "resolved_rate": 1.0,
+    "unique_repos": 212,
+    "mean_efficiency_score": 0.8790609653641662,
+    "mean_style_score": 0.5152774472841568,
+    "mean_b2_error_retry": 0.9486000000000001,
+    "mean_b3_step_count_ratio": 0.8095219307283326,
+    "mean_c2_action_diversity": 0.6800193522617518,
+    "mean_c3_observation_utilization": 0.3505355423065617
+  }
+}

@@ -1,6 +1,16 @@
 MIT License
 
-Copyright (c) 2026
+Copyright (c) 2026 Yunze Han
+
+The accompanying paper, "A Systematic Evaluation of Trajectory Data Curation
+for LoRA Fine-Tuning of Code Agents" (Paper ID 700), has been accepted to the
+2026 International Conference on Intelligent Computing (ICIC 2026), held in
+Toronto, Canada. The paper itself is published under the copyright terms of
+the ICIC 2026 / Springer LNCS proceedings; please refer to the published
+version for the authoritative citation. This MIT license applies only to the
+source code, configuration files, and experimental artefacts contained in
+this repository, not to the published paper text or figures owned by the
+proceedings publisher.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

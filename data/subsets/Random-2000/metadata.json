@@ -1,0 +1,21 @@
+{
+  "name": "Random-2000",
+  "description": "2000 random trajectories from all 67,074 (no filtering)",
+  "purpose": "Scale baseline",
+  "selection_criteria": "Random sample (all trajectories)",
+  "expected_size": 2000,
+  "actual_size": 2000,
+  "stats": {
+    "mean_Q": 0.7855588857111641,
+    "median_Q": 0.7901798223373324,
+    "std_Q": 0.10269686070523892,
+    "min_Q": 0.5287698946265955,
+    "max_Q": 0.9553449262226575,
+    "mean_tokens": 47437.834,
+    "median_tokens": 44929.0,
+    "mean_turns": 64.109,
+    "submit_rate": 0.9045,
+    "resolved_rate": 0.474,
+    "unique_repos": 856
+  }
+}

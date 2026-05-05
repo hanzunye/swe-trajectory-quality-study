@@ -1,0 +1,27 @@
+{
+  "name": "TopQ-2000",
+  "description": "Top 2000 by composite_score from resolved pool (32,161)",
+  "purpose": "Scale quality filter",
+  "selection_criteria": "Top composite_score (resolved pool)",
+  "expected_size": 2000,
+  "actual_size": 2000,
+  "stats": {
+    "mean_Q": 0.6919764311460367,
+    "median_Q": 0.6847911086807607,
+    "std_Q": 0.028223373737368114,
+    "min_Q": 0.6584549610247286,
+    "max_Q": 0.8219239933188744,
+    "mean_tokens": 33415.421,
+    "median_tokens": 31589.5,
+    "mean_turns": 46.261,
+    "submit_rate": 0.984,
+    "resolved_rate": 1.0,
+    "unique_repos": 512,
+    "mean_efficiency_score": 0.8254624674344002,
+    "mean_style_score": 0.5584903948576734,
+    "mean_b2_error_retry": 0.82715,
+    "mean_b3_step_count_ratio": 0.8237749348688003,
+    "mean_c2_action_diversity": 0.6928560407780275,
+    "mean_c3_observation_utilization": 0.42412474893731905
+  }
+}

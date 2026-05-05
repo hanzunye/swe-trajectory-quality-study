@@ -1,173 +1,193 @@
-# 轨迹质量感知数据选择 — 实验设计 v3
+# Trajectory-Quality-Aware Data Selection — Experiment Design v3
 
-**基座模型**：Qwen2.5-Coder-7B-Instruct  
-**微调方法**：LoRA  
-**数据来源**：SWE-trajectory 数据集  
-**日期**：2026年2月
+**Base model**: Qwen2.5-Coder-7B-Instruct
+**Fine-tuning method**: LoRA
+**Data source**: SWE-trajectory dataset
+**Date**: February 2026
+**Status**: Accepted to ICIC 2026 (Toronto, Canada). Paper ID 700.
 
 ---
 
-## 一、评分体系设计
+## 1. Scoring Framework
 
-### 1.1 设计原则
+### 1.1 Design Principle
 
-评分体系回答一个核心问题：**"如果一个人类专家在做同样的任务，他会怎么评价这条轨迹？"**
+The scoring framework answers a single core question: **"If a human expert were performing the same task, how would they evaluate this trajectory?"**
 
-人类专家评价一个开发者的 debug 过程，关注两件事：**你做得聪不聪明（Efficiency）？你的过程干不干净（Style）？** 至于"做对了没有"（Correctness）和"轨迹完不完整"（Completeness），则作为前置过滤条件，不参与连续评分。
+When a human expert evaluates a developer's debugging process, they care about two things: **how cleverly is it done (Efficiency)?** and **how clean is the process (Style)?** Whether the task was actually solved (Correctness) and whether the trajectory is complete (Completeness) are treated as up-front filtering conditions and do not enter the continuous score.
 
-### 1.2 前置过滤（Gate Conditions）
+### 1.2 Pre-scoring Filters (Gate Conditions)
 
-以下条件不参与评分，仅决定轨迹是否进入评分池：
+The following conditions are *not* scored; they only determine whether a trajectory enters the scoring pool.
 
-| Gate | 条件 | 理由 |
-|------|------|------|
-| **Completeness Gate** | Truncation Ratio ≥ 0.9 | 截断比在数据集中几乎为常量（med=1.0, std≈0），无区分力，仅用于清理少量脏数据 |
-| **Correctness Gate** | Outcome Success = 1（Resolved） | 二值变量不应与连续变量混合加权；将其作为分层条件，在 resolved 池内排序 |
-| **Format Gate** | 轨迹可被解析为 thought-action-observation 结构 | 格式损坏的轨迹无法可靠打分 |
+| Gate | Condition | Rationale |
+|------|-----------|-----------|
+| **Completeness Gate** | Truncation Ratio >= 0.9 | The truncation ratio is essentially constant on this dataset (median = 1.0, std ~ 0). It carries no discriminating power and is used only to clean a small amount of dirty data. |
+| **Correctness Gate** | Outcome Success = 1 (Resolved) | A binary variable should not be mixed with continuous variables in a weighted average. We use it as a stratification condition and rank only inside the resolved pool. |
+| **Format Gate** | Trajectory parses into thought-action-observation structure | Format-broken trajectories cannot be scored reliably. |
 
-**为什么不把 Correctness 作为评分维度？**  
-Outcome Success 是 binary（0/1），与连续维度做 weighted average 会导致评分被 0/1 主导。改为 gate 后，评分池内所有轨迹都是 resolved 的，评分聚焦于"如何更好地完成任务"。
+**Why is Correctness not a scoring dimension?**
+Outcome Success is binary (0/1). Combining it with continuous dimensions in a weighted average lets the 0/1 term dominate the score. After moving it to the gate, every trajectory in the scoring pool is resolved, and the score focuses on "how well was the task done".
 
-### 1.3 连续评分维度（4维）
+### 1.3 Continuous Scoring Dimensions (4 active dims)
 
-过滤后剩余 **32,161 条 resolved 轨迹**，在池内用以下 4 个维度评分：
+After filtering, **32,161 resolved trajectories** remain. They are ranked along the following four dimensions.
 
-#### Efficiency（效率）— 达成目标的路径是否精简
+#### Efficiency — is the path to the goal concise?
 
-| 子维度 | 定义 | 打分方式 | 分布特征 |
-|--------|------|----------|----------|
-| **B2: Error-Retry Cycles** | 出错后反复重试的代价 | 统计 "action→error observation→类似action" 的循环数，归一化取反 | std=0.286, med=0.300，**区分力最强** |
-| **B3: Step Count Ratio** | 步骤数的合理性 | 本轨迹步数 / 同 task 所有 resolved 轨迹的中位步数，clip 后归一化取反 | std=0.063, med=0.800 |
+| Sub-dimension | Definition | Scoring | Distribution |
+|---------------|------------|---------|--------------|
+| **B2: Error-Retry Cycles** | Cost of retrying after errors | Count "action -> error observation -> similar action" cycles, normalize, invert | std = 0.286, median = 0.300 — **most discriminating dimension** |
+| **B3: Step Count Ratio** | Reasonableness of the step count | This trajectory's step count divided by the median across all resolved trajectories of the same task; clipped, normalized, inverted | std = 0.063, median = 0.800 |
 
-#### Style（风格质量）— 轨迹作为训练数据的干净程度
+#### Style — is the trajectory clean as training data?
 
-| 子维度 | 定义 | 打分方式 | 分布特征 |
-|--------|------|----------|----------|
-| **C2: Action Diversity** | 工具使用是否合理多样 | action type 的 entropy，归一化到 [0,1] | std=0.046, med=0.655 |
-| **C3: Observation Utilization** | 是否有效利用了 observation 信息 | observation 中出现的文件名（basename）/错误类名在后续 action 中被引用的比例 | std=0.118, med=0.313 |
+| Sub-dimension | Definition | Scoring | Distribution |
+|---------------|------------|---------|--------------|
+| **C2: Action Diversity** | Reasonable variety of tool use | Entropy of action types, normalized to [0, 1] | std = 0.046, median = 0.655 |
+| **C3: Observation Utilization** | Effective use of observation content | Fraction of filenames (basename) / error class names from observations that are referenced in subsequent actions | std = 0.118, median = 0.313 |
 
-#### 被排除的维度及原因
+#### Excluded dimensions and rationale
 
-| 维度 | 排除原因 |
-|------|----------|
-| **B1: Redundant Commands** | std=0.033, med=0.962，几乎无区分力。数据集中的 agent 很少执行完全重复的命令 |
-| **C1: Observation Cleanliness** | std=0.043, med=0.967，几乎无区分力。绝大多数 observation 都是干净的 |
+| Dimension | Reason for exclusion |
+|-----------|----------------------|
+| **B1: Redundant Commands** | std = 0.033, median = 0.962 — almost no discriminating power. Agents in this dataset rarely repeat exact commands. |
+| **C1: Observation Cleanliness** | std = 0.043, median = 0.967 — almost no discriminating power. The vast majority of observations are already clean. |
 
-> **论文表述**：我们设计了 6 个候选子维度，通过方差分析发现 B1 和 C1 在该数据集上缺乏区分力（std < 0.05），因此排除。这本身是一个发现——SWE-trajectory 数据集的 agent 在命令冗余和 observation 干净程度上已高度同质化。
+> **Paper framing**: We designed six candidate sub-dimensions. Variance analysis showed that B1 and C1 lacked discriminating power on this dataset (std < 0.05) and were therefore excluded. This is itself a finding — the agents in the SWE-trajectory dataset are highly homogeneous in command redundancy and observation cleanliness.
 
-### 1.4 评分聚合
+### 1.4 Score Aggregation
 
 ```
-Efficiency = mean(B2, B3)           # std=0.152, med=0.529
-Style      = mean(C2, C3)           # std=0.063, med=0.485
-Composite  = 0.5 × Efficiency + 0.5 × Style   # std=0.083, med=0.507
+Efficiency = mean(B2, B3)            # std = 0.152, median = 0.529
+Style      = mean(C2, C3)            # std = 0.063, median = 0.485
+Composite  = 0.5 * Efficiency + 0.5 * Style   # std = 0.083, median = 0.507
 ```
 
-### 1.5 C3 实现细节
+### 1.5 C3 Implementation Note
 
-初版 C3 使用完整路径匹配（如 `src/utils.py`），导致 agent 引用 `utils.py`（无路径前缀）时匹配失败，median 仅 0.201。修复后改为 basename 匹配，median 提升至 0.313。剩余的低利用率反映了 agent 普遍存在的"读了不用"问题，本身是一个值得讨论的发现。
-
----
-
-## 二、实验分组设计
-
-### 2.1 总览（13组 + 1 baseline）
-
-| # | 实验名 | 样本池 | 选择方式 | 样本数 | 所属 Block |
-|---|--------|--------|----------|--------|------------|
-| 0 | baseline | — | 无微调 | — | — |
-| 1 | Random-500 | 全量 | 随机 | 500 | Block 1 |
-| 2 | Random-1000 | 全量 | 随机 | 1000 | Block 1 |
-| 3 | TopQ-500 | resolved | composite 排序 top | 500 | Block 1 |
-| 4 | TopQ-1000 | resolved | composite 排序 top | 1000 | Block 1 |
-| 5 | ResolvedOnly-500 | resolved | 随机 | 500 | Block 1 |
-| 6 | ResolvedOnly-1000 | resolved | 随机 | 1000 | Block 1 |
-| 7 | BottomQ-500 | resolved | composite 倒序 bottom | 500 | Block 1 |
-| 8 | Ablation-NoEfficiency-500 | resolved | 仅 Style 排序 | 500 | Block 2 |
-| 9 | Ablation-NoStyle-500 | resolved | 仅 Efficiency 排序 | 500 | Block 2 |
-| 10 | Ablation-NoB2-500 | resolved | Efficiency=B3 only | 500 | Block 3 |
-| 11 | Ablation-NoB3-500 | resolved | Efficiency=B2 only | 500 | Block 3 |
-| 12 | Ablation-NoC2-500 | resolved | Style=C3 only | 500 | Block 3 |
-| 13 | Ablation-NoC3-500 | resolved | Style=C2 only | 500 | Block 3 |
-
-### 2.2 各 Block 的研究问题
-
-#### Block 1：数据量与策略对比（7组）
-
-| 对比 | 研究问题 |
-|------|----------|
-| exp1 vs exp5 | **Gate 有没有用？** 全量随机 vs resolved 池随机 |
-| exp5 vs exp3 | **评分有没有用？** resolved 随机 vs resolved 排序 |
-| exp1→exp2, exp3→exp4, exp5→exp6 | **数据量 scaling 效果**，三种策略下 500→1000 的提升幅度 |
-| exp3 vs exp7 | **Sanity check**：最好 vs 最差，验证评分体系有效性 |
-
-#### Block 2：大维度消融（2组）
-
-| 对比 | 研究问题 |
-|------|----------|
-| exp8 vs exp9 vs exp3 | **Efficiency vs Style 哪个更重要？** 单用 vs 组合 |
-
-#### Block 3：子维度消融（4组）
-
-| 对比 | 研究问题 |
-|------|----------|
-| exp10 vs exp11 vs exp3 | **Efficiency 内部**：Error-Retry Cycles vs Step Count Ratio |
-| exp12 vs exp13 vs exp3 | **Style 内部**：Action Diversity vs Observation Utilization |
-
-### 2.3 可复用的旧实验
-
-| 实验 | 是否可复用 | 原因 |
-|------|------------|------|
-| baseline | ✅ 复用 | 无微调 |
-| Random-500 (exp1) | ✅ 复用 | 随机采样与评分体系无关 |
-| Random-1000 (exp2) | ✅ 复用 | 同上 |
-| 其余所有 | ❌ 需重训 | 评分公式变化导致选出的样本不同 |
-
-**实际需要新训练：11 组**
+The first version of C3 used full-path matching (e.g. `src/utils.py`), which caused matches to fail when the agent referred to `utils.py` without the path prefix; the median was only 0.201. After switching to basename matching, the median rose to 0.313. The remaining low utilization reflects a general "read but not use" pattern in agent behaviour and is itself a finding worth discussing.
 
 ---
 
-## 三、评测方案
+## 2. Experimental Group Design
 
-### 3.1 困惑度评测（Perplexity / Cross-Entropy Loss）
+### 2.1 Overview
 
-在三个独立测试集上计算 assistant token 的平均交叉熵损失：
+The experiment matrix is organized into three blocks. Block A (13 runs) is the original core matrix; Blocks B and C extend the study with a scaling experiment and a single-dimension ranking probe respectively.
 
-| 测试集 | 样本数 | 来源 |
-|--------|--------|------|
-| Gold | 200 | **新 composite score** 最高的轨迹 |
-| Random | 200 | 随机采样 |
-| Low-Q | 200 | **新 composite score** 最低的轨迹 |
+| # | Experiment | Pool | Selection | Size | Block |
+|---|------------|------|-----------|------|-------|
+| 0 | baseline | — | no fine-tuning | — | — |
+| 1 | Random-500 | full | random | 500 | A1 |
+| 2 | Random-1000 | full | random | 1000 | A1 |
+| 3 | TopQ-500 | resolved | top by composite | 500 | A1 |
+| 4 | TopQ-1000 | resolved | top by composite | 1000 | A1 |
+| 5 | ResolvedOnly-500 | resolved | random | 500 | A1 |
+| 6 | ResolvedOnly-1000 | resolved | random | 1000 | A1 |
+| 7 | BottomQ-500 | resolved | bottom by composite | 500 | A1 |
+| 8 | Ablation-NoEfficiency-500 | resolved | rank by Style only | 500 | A2 |
+| 9 | Ablation-NoStyle-500 | resolved | rank by Efficiency only | 500 | A2 |
+| 10 | Ablation-NoB2-500 | resolved | Efficiency = B3 only | 500 | A3 |
+| 11 | Ablation-NoB3-500 | resolved | Efficiency = B2 only | 500 | A3 |
+| 12 | Ablation-NoC2-500 | resolved | Style = C3 only | 500 | A3 |
+| 13 | Ablation-NoC3-500 | resolved | Style = C2 only | 500 | A3 |
+| 14 | Random-2000 | full | random | 2000 | B |
+| 15 | TopQ-2000 | resolved | top by composite | 2000 | B |
+| 16 | B2Only-Top500 | resolved | top by B2 alone | 500 | C |
 
-> **注意**：测试集也需要根据新评分重新构建，确保 Gold/Low-Q 反映的是新体系下的质量排序。
+### 2.2 Research Questions per Block
 
-### 3.2 预期验证
+#### Block A1 — Data scale and selection strategy (7 runs)
 
-所有模型应呈现 **Gold < Random < Low-Q** 的 loss 梯度，以验证新评分体系的合理性。
+| Comparison | Research question |
+|------------|-------------------|
+| exp1 vs exp5 | **Does the gate help?** Random from full pool vs random from resolved pool. |
+| exp5 vs exp3 | **Does scoring help?** Random in resolved pool vs top of resolved pool. |
+| exp1 -> exp2, exp3 -> exp4, exp5 -> exp6 | **Scaling**: how much does each strategy gain from 500 -> 1000? |
+| exp3 vs exp7 | **Sanity check**: best vs worst — does the score actually correlate with downstream quality? |
+
+#### Block A2 — Group-level ablations (2 runs)
+
+| Comparison | Research question |
+|------------|-------------------|
+| exp8 vs exp9 vs exp3 | **Which group matters more, Efficiency or Style?** Single-group vs combined. |
+
+#### Block A3 — Sub-dimension ablations (4 runs)
+
+| Comparison | Research question |
+|------------|-------------------|
+| exp10 vs exp11 vs exp3 | **Inside Efficiency**: error-retry cycles vs step-count ratio. |
+| exp12 vs exp13 vs exp3 | **Inside Style**: action diversity vs observation utilization. |
+
+#### Block B — Scale extension (2 runs)
+
+| Comparison | Research question |
+|------------|-------------------|
+| exp2 -> exp14, exp4 -> exp15 | **Does the quality vs quantity gap close as data scales?** Compare 1000 -> 2000 for both Random and TopQ. |
+| exp14 vs exp15 | **Does TopQ still beat Random at 2000?** Confirms that the scoring advantage is not an artefact of small-sample variance. |
+
+#### Block C — Single-dimension ranking (1 run)
+
+| Comparison | Research question |
+|------------|-------------------|
+| exp16 vs exp3 | **Is the composite score necessary, or is ranking by the single most discriminating dimension (B2) enough?** Stress-tests whether the multi-dim composite adds value over its strongest constituent. |
+
+### 2.3 Reusable Prior Runs
+
+| Experiment | Reusable | Reason |
+|------------|----------|--------|
+| baseline | yes | no fine-tuning |
+| Random-500 (exp1) | yes | random sampling is independent of the scoring system |
+| Random-1000 (exp2) | yes | same as above |
+| All others | no | new scoring formula -> different selected samples |
+
+**New training runs needed: 14 (11 in Block A, 2 in Block B, 1 in Block C).**
 
 ---
 
-## 四、论文故事线
+## 3. Evaluation Plan
+
+### 3.1 Perplexity (Cross-Entropy Loss)
+
+Average cross-entropy loss over assistant tokens, computed on three independent test sets.
+
+| Test set | Size | Source |
+|----------|------|--------|
+| Gold | 200 | Trajectories with the highest composite score under the new scheme. |
+| Random | 200 | Random sample. |
+| Low-Q | 200 | Trajectories with the lowest composite score under the new scheme. |
+
+> **Note**: Test sets must also be rebuilt under the new scoring system to ensure that Gold / Low-Q reflect the current notion of quality.
+
+### 3.2 Expected Validation Pattern
+
+All trained models should exhibit a **Gold < Random < Low-Q** loss gradient, validating that the scoring system tracks downstream quality.
+
+---
+
+## 4. Paper Storyline
 
 ```
-第一层：微调本身有没有用？     baseline vs 任意微调模型
-第二层：Gate 有没有用？        Random-500 vs ResolvedOnly-500
-第三层：评分有没有用？         ResolvedOnly-500 vs TopQ-500
-第四层：数据量 vs 质量？       500→1000 scaling curve（三种策略）
-第五层：哪个大维度重要？       EfficiencyOnly vs StyleOnly vs TopQ
-第六层：哪个子维度重要？       子维度消融（B2/B3/C2/C3）
-验证层：评分体系有效吗？       TopQ vs BottomQ + 测试集质量梯度
+Layer 1: Does fine-tuning itself help?       baseline vs any fine-tuned model
+Layer 2: Does the gate help?                 Random-500 vs ResolvedOnly-500
+Layer 3: Does scoring help?                  ResolvedOnly-500 vs TopQ-500
+Layer 4: Scale vs quality?                   500 -> 1000 -> 2000 scaling curve (Block B)
+Layer 5: Which group matters more?           EfficiencyOnly vs StyleOnly vs TopQ
+Layer 6: Which sub-dimension matters most?   sub-dim ablations (B2/B3/C2/C3)
+Layer 7: Is the composite necessary?         B2Only-Top500 vs TopQ-500 (Block C)
+Validation: Is the scoring system valid?     TopQ vs BottomQ + test-set quality gradient
 ```
 
 ---
 
-## 五、设计决策记录
+## 5. Design Decision Log
 
-| 决策 | 选择 | 替代方案 | 理由 |
-|------|------|----------|------|
-| Truncation Ratio 处理 | Gate（过滤） | 作为评分维度 | std≈0，无区分力 |
-| Outcome Success 处理 | Gate（分层） | 作为连续评分维度 | binary 变量不宜与连续变量加权平均 |
-| B1/C1 排除 | 从 composite 移除 | rank normalization 强制拉平 | rank normalization 会放大噪声，移除更诚实 |
-| C3 文件匹配 | basename 匹配 | 完整路径匹配 | agent 常省略路径前缀，完整匹配导致 C3 系统性偏低 |
-| 聚合方式 | 层级 mean + 等权 | 加权平均 / 学习权重 | 等权作为默认选择，权重差异可通过消融实验间接体现 |
-| 数据规模 | 500 / 1000 | 2000 / 5000 | GPU 资源限制 |
+| Decision | Choice | Alternative | Rationale |
+|----------|--------|-------------|-----------|
+| Truncation ratio | gate (filter) | scoring dimension | std ~ 0, no discriminating power |
+| Outcome success | gate (stratification) | continuous scoring dimension | binary variable should not be averaged with continuous ones |
+| B1 / C1 | drop from composite | rank-normalize them | rank normalization amplifies noise; dropping them is more honest |
+| C3 file matching | basename match | full-path match | agents often drop the path prefix; full-path matching makes C3 systematically too low |
+| Aggregation | hierarchical mean, equal weights | weighted average / learned weights | equal weights is the principled default; weight differences are exposed indirectly through ablations |
+| Data sizes | 500 / 1000 (Block A) + 2000 (Block B) | 5000+ | GPU budget |

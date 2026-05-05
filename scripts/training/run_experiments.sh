@@ -2,13 +2,19 @@
 # ============================================================
 # Run All Experiments Sequentially with Auto-Resume
 #
-# This script runs all 13 experiments in order, automatically
+# This script runs all 16 experiments in order, automatically
 # resuming from checkpoints if a spot instance was interrupted.
+#
+#   Block A (exp1–exp13): core matrix (Random/TopQ/ResolvedOnly,
+#                         BottomQ sanity check, group + dim ablations)
+#   Block B (exp14–exp15): scale extension to 2000 (Random/TopQ)
+#   Block C (exp16):       single-dimension ranking (B2Only-Top500)
 #
 # Usage:
 #   bash run_experiments.sh              # Run all from exp1
 #   bash run_experiments.sh exp3         # Start from exp3
 #   bash run_experiments.sh exp7 exp13   # Run exp7 through exp13
+#   bash run_experiments.sh exp14 exp16  # Run only the new Block B/C
 #
 # Optional env vars:
 #   WORKSPACE    Override workspace root (default: /workspace on cloud)
@@ -27,11 +33,11 @@ STATUS_FILE="${WORKSPACE}/experiment_status.json"
 SUBSET_DIR="${SUBSET_DIR:-}"
 
 # Ordered experiment list
-ALL_EXPERIMENTS=(exp1 exp2 exp3 exp4 exp5 exp6 exp7 exp8 exp9 exp10 exp11 exp12 exp13)
+ALL_EXPERIMENTS=(exp1 exp2 exp3 exp4 exp5 exp6 exp7 exp8 exp9 exp10 exp11 exp12 exp13 exp14 exp15 exp16)
 
 # Parse args: optional start and end experiment
 START_EXP="${1:-exp1}"
-END_EXP="${2:-exp13}"
+END_EXP="${2:-exp16}"
 
 # ── Helper functions ─────────────────────────────────────
 

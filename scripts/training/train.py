@@ -326,7 +326,7 @@ def train(cfg: ExperimentConfig, resume: bool = False):
 
 def main():
     parser = argparse.ArgumentParser(description="QLoRA Fine-tuning with Spot Resume")
-    parser.add_argument("--experiment", required=True, help="Experiment name (exp1..exp13)")
+    parser.add_argument("--experiment", required=True, help="Experiment name (exp1..exp16)")
     parser.add_argument("--resume", action="store_true", help="Resume from latest checkpoint")
     parser.add_argument("--epochs", type=int, help="Override number of epochs")
     parser.add_argument("--lr", type=float, help="Override learning rate")

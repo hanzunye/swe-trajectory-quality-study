@@ -55,6 +55,7 @@ MODEL_ID = "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 # All subsets matching the experiment matrix (must match Subset/output/ dir names)
 ALL_SUBSETS = [
+    # Block A — core matrix (exp1–exp13)
     "Random-500", "Random-1000",
     "TopQ-500", "TopQ-1000",
     "ResolvedOnly-500", "ResolvedOnly-1000",
@@ -65,6 +66,11 @@ ALL_SUBSETS = [
     "Ablation-NoB3-500",
     "Ablation-NoC2-500",
     "Ablation-NoC3-500",
+    # Block B — scale extension (exp14–exp15)
+    "Random-2000",
+    "TopQ-2000",
+    # Block C — single-dimension ranking (exp16)
+    "B2Only-Top500",
 ]
 
 

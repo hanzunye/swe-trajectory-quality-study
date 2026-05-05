@@ -2,6 +2,12 @@
 
 A systematic empirical study of data quality filtering strategies for LoRA fine-tuning of code agent LLMs on the SWE-trajectory dataset.
 
+> **Publication.** This work has been accepted to the **2026 International
+> Conference on Intelligent Computing (ICIC 2026)**, Toronto, Canada
+> (Paper, "A Systematic Evaluation of Trajectory Data Curation for
+> LoRA Fine-Tuning of Code Agents", Yunze Han). Please cite the published
+> proceedings version when referencing this work.
+
 ## Key Finding
 
 In the 500–2000 trajectory regime, **data quantity effects (~12.7% relative loss reduction)** substantially exceed **data quality filtering effects (~0.7%, p > 0.10)**. However, the quality gap widens at 2000 samples (3.6% vs 0.7% at 500), suggesting a crossover point may exist at larger scales where quality filtering becomes the dominant factor.
@@ -18,85 +24,6 @@ In the 500–2000 trajectory regime, **data quantity effects (~12.7% relative lo
 |----------|------|-------------|
 | Quality-Scored Subsets | [huggingface.co/datasets/davongluck/swe-trajectory-subsets](https://huggingface.co/datasets/davongluck/swe-trajectory-subsets) | 16 curated training subsets with quality scores |
 
-## Project Structure
-
-```
-swe-trajectory-quality-study/
-├── README.md
-├── requirements.txt
-│
-├── scripts/
-│   ├── scoring/                         # Phase 1: Quality Scoring
-│   │   ├── run_analysis.py
-│   │   ├── scoring.py                   # Core scoring logic (B2, B3, C2, C3)
-│   │   ├── scoring_config.py
-│   │   ├── analysis.py
-│   │   └── scoring_visualize.py
-│   │
-│   ├── subset/                          # Phase 2: Subset Construction
-│   │   ├── run_subset.py
-│   │   ├── builder.py                   # Selection logic (TopQ, Random, etc.)
-│   │   ├── subset_config.py             # 16 subset configurations
-│   │   ├── subset_visualize.py
-│   │   └── upload_to_hf.py
-│   │
-│   ├── training/                        # Phase 3: LoRA Fine-Tuning
-│   │   ├── prepare_data.py              # ChatML serialization & tokenization
-│   │   ├── train.py                     # QLoRA training (Qwen2.5-Coder-7B)
-│   │   ├── configs.py
-│   │   ├── run_experiments.sh
-│   │   └── setup.sh
-│   │
-│   └── evaluation/                      # Phase 4: Evaluation
-│       ├── build_test_set.py            # Gold/Random/Low-Q test set construction
-│       ├── eval_perplexity.py           # Cross-entropy loss evaluation
-│       ├── eval_perplexity_extended.py  # Extended eval (exp14–16)
-│       ├── eval_next_action.py          # Next-action prediction
-│       ├── eval_first_action.py         # First-action generation eval
-│       ├── analyze_results.py           # Statistical analysis & hypothesis testing
-│       ├── run_eval.sh
-│       └── run_pipeline.sh
-│
-├── data/
-│   ├── quality_scores/
-│   │   ├── summary_statistics.csv
-│   │   └── trajectory_analysis.csv
-│   │
-│   ├── subsets/                         # 16 training subsets (metadata.json each)
-│   │   └── {TopQ,Random,ResolvedOnly,BottomQ,Ablation-*}-{500,1000,2000}/
-│   │
-│   ├── training_logs/
-│   │   └── exp{1..16}_summary.json
-│   │
-│   └── eval_results/
-│       ├── perplexity_results.csv           # exp1–13 (14 models × 3 test sets)
-│       ├── perplexity_results_extended.csv  # exp1–16 (17 models × 3 test sets)
-│       ├── next_action_results.json
-│       ├── first_action_results.json
-│       ├── first_action_summary.csv
-│       ├── first_action_summary_extended.csv
-│       ├── first_action_correlation.json
-│       ├── experiment_A_analysis.md
-│       ├── SUMMARY_REPORT.md
-│       ├── test_set_ids.json
-│       ├── stats_report.md
-│       └── experiment_report.md
-│
-├── figures/
-│   ├── fig1_score_distributions.png
-│   ├── fig2_loss_comparison.png
-│   ├── fig3_hypothesis_validation.png
-│   ├── fig4_ablation_impact.png
-│   ├── fig5_proxy_validation.png        # CE Loss vs ROUGE-L (Exp A)
-│   ├── fig6_scaling_curve.png           # Scaling 500→2000 (Exp B)
-│   ├── fig7_fa_scaling_curve.png        # First-Action scaling (Exp B)
-│   ├── fig8_b2only_ablation.png         # Composite vs B2-only (Exp C)
-│   ├── fig9_first_action_bars.png       # First-action bar chart (Exp A)
-│   └── supp_*.png                       # Supplementary figures
-│
-└── configs/
-    └── experiment_design_v3.md
-```
 
 ## Experiment Overview
 
@@ -259,7 +186,107 @@ python scripts/evaluation/eval_first_action.py \
 # Regenerate figures from existing results
 python scripts/evaluation/eval_first_action.py --plot-only
 ```
+## Project Structure
+
+```
+swe-trajectory-quality-study/
+├── README.md
+├── requirements.txt
+│
+├── scripts/
+│   ├── scoring/                         # Phase 1: Quality Scoring
+│   │   ├── run_analysis.py
+│   │   ├── scoring.py                   # Core scoring logic (B2, B3, C2, C3)
+│   │   ├── scoring_config.py
+│   │   ├── analysis.py
+│   │   └── scoring_visualize.py
+│   │
+│   ├── subset/                          # Phase 2: Subset Construction
+│   │   ├── run_subset.py
+│   │   ├── builder.py                   # Selection logic (TopQ, Random, etc.)
+│   │   ├── subset_config.py             # 16 subset configurations
+│   │   ├── subset_visualize.py
+│   │   └── upload_to_hf.py
+│   │
+│   ├── training/                        # Phase 3: LoRA Fine-Tuning
+│   │   ├── prepare_data.py              # ChatML serialization & tokenization
+│   │   ├── train.py                     # QLoRA training (Qwen2.5-Coder-7B)
+│   │   ├── configs.py
+│   │   ├── run_experiments.sh
+│   │   └── setup.sh
+│   │
+│   └── evaluation/                      # Phase 4: Evaluation
+│       ├── build_test_set.py            # Gold/Random/Low-Q test set construction
+│       ├── eval_perplexity.py           # Cross-entropy loss evaluation
+│       ├── eval_perplexity_extended.py  # Extended eval (exp14–16)
+│       ├── eval_next_action.py          # Next-action prediction
+│       ├── eval_first_action.py         # First-action generation eval
+│       ├── analyze_results.py           # Statistical analysis & hypothesis testing
+│       ├── run_eval.sh
+│       └── run_pipeline.sh
+│
+├── data/
+│   ├── quality_scores/
+│   │   ├── summary_statistics.csv
+│   │   └── trajectory_analysis.csv
+│   │
+│   ├── subsets/                         # 16 training subsets (metadata.json each)
+│   │   └── {TopQ,Random,ResolvedOnly,BottomQ,Ablation-*}-{500,1000,2000}/
+│   │
+│   ├── training_logs/
+│   │   └── exp{1..16}_summary.json
+│   │
+│   └── eval_results/
+│       ├── perplexity_results.csv           # exp1–13 (14 models × 3 test sets)
+│       ├── perplexity_results_extended.csv  # exp1–16 (17 models × 3 test sets)
+│       ├── next_action_results.json
+│       ├── first_action_results.json
+│       ├── first_action_summary.csv
+│       ├── first_action_summary_extended.csv
+│       ├── first_action_correlation.json
+│       ├── experiment_A_analysis.md
+│       ├── SUMMARY_REPORT.md
+│       ├── test_set_ids.json
+│       ├── stats_report.md
+│       └── experiment_report.md
+│
+├── figures/
+│   ├── fig1_score_distributions.png
+│   ├── fig2_loss_comparison.png
+│   ├── fig3_hypothesis_validation.png
+│   ├── fig4_ablation_impact.png
+│   ├── fig5_proxy_validation.png        # CE Loss vs ROUGE-L (Exp A)
+│   ├── fig6_scaling_curve.png           # Scaling 500→2000 (Exp B)
+│   ├── fig7_fa_scaling_curve.png        # First-Action scaling (Exp B)
+│   ├── fig8_b2only_ablation.png         # Composite vs B2-only (Exp C)
+│   ├── fig9_first_action_bars.png       # First-action bar chart (Exp A)
+│   └── supp_*.png                       # Supplementary figures
+│
+└── configs/
+    └── experiment_design_v3.md
+```
+
+## Citation
+
+If you use this repository or its results, please cite the ICIC 2026
+proceedings version (replace page numbers and DOI with the final values once
+the proceedings are released):
+
+```bibtex
+@inproceedings{han2026trajectory,
+  title     = {A Systematic Evaluation of Trajectory Data Curation for
+               LoRA Fine-Tuning of Code Agents},
+  author    = {Han, Yunze},
+  booktitle = {Proceedings of the 2026 International Conference on
+               Intelligent Computing (ICIC 2026)},
+  address   = {Toronto, Canada},
+  year      = {2026},
+}
+```
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+The code and experimental artefacts in this repository are released under the
+MIT License — see [LICENSE](LICENSE) for details. The published paper itself
+is covered by the ICIC 2026 / Springer LNCS proceedings copyright; please
+refer to the published version for the authoritative copyright notice.

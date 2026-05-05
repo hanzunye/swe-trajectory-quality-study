@@ -56,11 +56,16 @@ class ExperimentConfig:
 
 
 # ── Experiment Matrix (§3.4.3) ────────────────────────────
-# 13 experiments total:
-#   exp1–exp4  : scale/quality baselines (Random, TopQ)
-#   exp5–exp7  : filter-strategy comparisons (ResolvedOnly, BottomQ sanity check)
-#   exp8–exp9  : group ablations (no Efficiency, no Style)
-#   exp10–exp13: dimension ablations (no B2/B3/C2/C3)
+# 16 experiments total, organized into three blocks:
+#   Block A — Core matrix (13 runs):
+#     exp1–exp4  : scale/quality baselines (Random, TopQ at 500/1000)
+#     exp5–exp7  : filter-strategy comparisons (ResolvedOnly, BottomQ sanity check)
+#     exp8–exp9  : group ablations (drop Efficiency, drop Style)
+#     exp10–exp13: dimension ablations (drop B2/B3/C2/C3 individually)
+#   Block B — Scale extension (2 runs):
+#     exp14–exp15: scale-up to 2000 trajectories (Random-2000, TopQ-2000)
+#   Block C — Single-dimension ranking (1 run):
+#     exp16      : B2-only ranking baseline (B2Only-Top500)
 
 EXPERIMENTS = {
     # ── Baselines ────────────────────────────────────────────
@@ -145,11 +150,31 @@ EXPERIMENTS = {
         hypothesis="Ablation: remove C3 (observation_utilization) from Style",
         est_gpu_hours=6.0,
     ),
+    # ── Scale extension (Experiment B) ───────────────────────
+    "exp14": ExperimentConfig(
+        name="exp14",
+        subset="Random-2000",
+        hypothesis="Scale baseline: 2000 random trajectories (Experiment B)",
+        est_gpu_hours=24.0,
+    ),
+    "exp15": ExperimentConfig(
+        name="exp15",
+        subset="TopQ-2000",
+        hypothesis="Scale quality: top 2000 by composite_score (Experiment B)",
+        est_gpu_hours=24.0,
+    ),
+    # ── Single-dimension ranking (Experiment C) ──────────────
+    "exp16": ExperimentConfig(
+        name="exp16",
+        subset="B2Only-Top500",
+        hypothesis="B2-only ranking vs composite score (Experiment C)",
+        est_gpu_hours=6.0,
+    ),
 }
 
 
 def get_experiment(name: str) -> ExperimentConfig:
-    """Get experiment config by name (exp1..exp13)."""
+    """Get experiment config by name (exp1..exp16)."""
     if name not in EXPERIMENTS:
         available = ", ".join(sorted(EXPERIMENTS.keys()))
         raise ValueError(f"Unknown experiment '{name}'. Available: {available}")
