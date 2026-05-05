@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from .config import RANDOM_SEED, SCORE_COL
+from subset_config import RANDOM_SEED, SCORE_COL
 
 logger = logging.getLogger(__name__)
 

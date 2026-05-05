@@ -14,7 +14,7 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-from .config import OUTPUT_ROOT
+from subset_config import OUTPUT_ROOT
 
 logger = logging.getLogger(__name__)
 sns.set_theme(style="whitegrid", font_scale=1.1)
