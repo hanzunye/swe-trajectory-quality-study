@@ -10,7 +10,9 @@ Constructs experimental subsets from Quality_Scoring v3 output:
 
   Subsets built:
     Random-500 / Random-1000          random from df_all (all trajectories)
+    Random-2000                       random from df_all (Experiment B scale)
     TopQ-500 / TopQ-1000              top N by composite_score (df_scored)
+    TopQ-2000                         top 2000 by composite_score (Experiment B scale)
     ResolvedOnly-500 / -1000          random from df_scored (resolved pool)
     BottomQ-500                       bottom 500 by composite_score (sanity check)
     Ablation-NoEfficiency-500         score = Style only  (no Efficiency term)
@@ -19,13 +21,17 @@ Constructs experimental subsets from Quality_Scoring v3 output:
     Ablation-NoB3-500                 Efficiency = B2 alone (drop B3)
     Ablation-NoC2-500                 Style = C3 alone      (drop C2)
     Ablation-NoC3-500                 Style = C2 alone      (drop C3)
+    B2Only-Top500                     top 500 ranked solely by B2 (Experiment C)
 """
 import logging
 from dataclasses import dataclass, field
 
 import pandas as pd
 
-from subset_config import RANDOM_SEED, SCORE_COL
+try:
+    from .subset_config import RANDOM_SEED, SCORE_COL
+except ImportError:
+    from subset_config import RANDOM_SEED, SCORE_COL
 
 logger = logging.getLogger(__name__)
 
@@ -299,6 +305,34 @@ def build_ablation_no_c3(df_scored: pd.DataFrame, size: int = 500) -> SubsetResu
     )
 
 
+# ── Single-dimension Ranking (Experiment C) ──────────────────────────────────
+
+def build_b2only_top(df_scored: pd.DataFrame, size: int = 500) -> SubsetResult:
+    """
+    B2Only-Top500 (Experiment C): Top N by the single most-discriminating
+    sub-dimension, B2 (error_retry). Probes whether the composite ranking
+    can be replaced by ranking on its strongest constituent alone.
+    """
+    sorted_df = df_scored.sort_values("b2_error_retry", ascending=False)
+    actual_size = min(size, len(sorted_df))
+    subset = sorted_df.head(actual_size)
+    stats = _compute_subset_stats(subset)
+
+    return SubsetResult(
+        name="B2Only-Top500",
+        description=(
+            f"Top {actual_size} by B2 (error_retry) alone, no composite "
+            f"(resolved pool, {len(df_scored):,})"
+        ),
+        purpose="Single-dimension ranking baseline (Experiment C)",
+        selection_criteria="Top b2_error_retry (resolved pool)",
+        expected_size=size,
+        actual_size=actual_size,
+        df=subset,
+        stats=stats,
+    )
+
+
 # ── Master Builder ───────────────────────────────────────────────────────────
 
 def build_all_subsets(
@@ -328,12 +362,18 @@ def build_all_subsets(
     logger.info("Building Random-1000...")
     results.append(build_random(df_all, size=1000, name="Random-1000"))
 
+    logger.info("Building Random-2000...")
+    results.append(build_random(df_all, size=2000, name="Random-2000"))
+
     # ── Quality-ranked (from resolved pool) ─────────────────────────────────
     logger.info("Building TopQ-500...")
     results.append(build_topq(df_scored, size=500, name="TopQ-500"))
 
     logger.info("Building TopQ-1000...")
     results.append(build_topq(df_scored, size=1000, name="TopQ-1000"))
+
+    logger.info("Building TopQ-2000...")
+    results.append(build_topq(df_scored, size=2000, name="TopQ-2000"))
 
     # ── Resolved-only random (from resolved pool) ────────────────────────────
     logger.info("Building ResolvedOnly-500...")
@@ -365,8 +405,13 @@ def build_all_subsets(
     logger.info("Building Ablation-NoC3-500...")
     results.append(build_ablation_no_c3(df_scored))
 
+    # ── Single-dimension ranking (Experiment C) ─────────────────────────────
+    logger.info("Building B2Only-Top500...")
+    results.append(build_b2only_top(df_scored, size=500))
+
     logger.info(
-        "All %d subsets built (4 standard + 2 resolved-only + 1 bottom + 6 ablation).",
+        "All %d subsets built "
+        "(6 standard + 2 resolved-only + 1 bottom + 6 ablation + 1 single-dim).",
         len(results),
     )
     return results

@@ -36,6 +36,7 @@ import argparse
 import gc
 import json
 import logging
+import os
 import re
 import time
 import warnings
@@ -54,10 +55,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── 路径配置 ──────────────────────────────────────────────────────────────
-SCRIPT_DIR   = Path(__file__).parent
-EVAL_DATA    = SCRIPT_DIR / "eval_data"
-OUTPUT_DIR   = SCRIPT_DIR / "eval_results"
-OUTPUTS_ROOT = SCRIPT_DIR / "outputs"   # LoRA adapter 默认目录
+WORKSPACE    = Path(os.environ.get("WORKSPACE", Path(__file__).resolve().parents[2]))
+DATA_ROOT    = WORKSPACE / "data"
+EVAL_DATA    = DATA_ROOT / "eval_data"
+OUTPUT_DIR   = DATA_ROOT / "eval_results"
+OUTPUTS_ROOT = WORKSPACE / "outputs"   # LoRA adapter 默认目录
 
 BASE_MODEL = "Qwen/Qwen2.5-Coder-7B-Instruct"
 

@@ -10,11 +10,12 @@ v3 scoring formula (active dims only):
   Style      = mean(C2, C3)          C2=action_diversity  C3=obs_utilization
   Composite  = 0.5 * Efficiency + 0.5 * Style
 """
+import os
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────────────────────────
-PROJECT_ROOT    = Path(__file__).resolve().parent.parent
-SCORING_ROOT    = PROJECT_ROOT.parent / "Quality_Scoring" / "output" / "full"
+REPO_ROOT       = Path(__file__).resolve().parents[2]
+SCORING_ROOT    = Path(os.environ.get("SCORING_ROOT", REPO_ROOT / "data" / "quality_scores" / "full"))
 
 # ALL trajectories (67k, resolved + unresolved), used for Random-* subsets
 PHASE1_JSONL    = SCORING_ROOT / "trajectory_stats.jsonl"
@@ -22,8 +23,8 @@ PHASE1_JSONL    = SCORING_ROOT / "trajectory_stats.jsonl"
 # Resolved trajectories only (32k), with v3 quality scores — used for all other subsets
 SCORED_CSV      = SCORING_ROOT / "trajectory_scored_v3.csv"
 
-OUTPUT_ROOT     = PROJECT_ROOT / "output"
-OUTPUT_ROOT.mkdir(exist_ok=True)
+OUTPUT_ROOT     = Path(os.environ.get("SUBSET_OUTPUT_ROOT", REPO_ROOT / "data" / "subsets"))
+OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
 # ── v3 Score Columns ────────────────────────────────────────────────────────
 SCORE_COL = "composite_score"          # primary ranking column

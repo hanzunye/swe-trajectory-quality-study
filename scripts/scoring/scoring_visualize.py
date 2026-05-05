@@ -12,7 +12,10 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-from .config import OUTPUT_ROOT
+try:
+    from .scoring_config import OUTPUT_ROOT
+except ImportError:
+    from scoring_config import OUTPUT_ROOT
 
 logger = logging.getLogger(__name__)
 sns.set_theme(style="whitegrid", font_scale=1.1)
@@ -251,7 +254,10 @@ def plot_v3_gate_summary(df: pd.DataFrame, out_dir: Path = OUTPUT_ROOT):
     n_total = len(df)
 
     if "total_tokens" in df.columns:
-        from .config import MODEL_CONTEXT_WINDOW, GATE_MIN_TRUNCATION_RATIO
+        try:
+            from .scoring_config import MODEL_CONTEXT_WINDOW, GATE_MIN_TRUNCATION_RATIO
+        except ImportError:
+            from scoring_config import MODEL_CONTEXT_WINDOW, GATE_MIN_TRUNCATION_RATIO
         trunc_ok = (
             df["total_tokens"].clip(upper=MODEL_CONTEXT_WINDOW) / df["total_tokens"].replace(0, 1)
             >= GATE_MIN_TRUNCATION_RATIO

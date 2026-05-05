@@ -39,9 +39,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── 路径配置 ──────────────────────────────────────────────────────────────
-WORKSPACE    = Path(os.environ.get("WORKSPACE", "/workspace"))
-EVAL_DATA    = WORKSPACE / "eval_data"
-OUTPUT_DIR   = WORKSPACE / "eval_results"
+WORKSPACE    = Path(os.environ.get("WORKSPACE", Path(__file__).resolve().parents[2]))
+DATA_ROOT    = WORKSPACE / "data"
+EVAL_DATA    = DATA_ROOT / "eval_data"
+OUTPUT_DIR   = DATA_ROOT / "eval_results"
 OUTPUTS_ROOT = WORKSPACE / "outputs"
 
 BASE_MODEL  = "Qwen/Qwen2.5-Coder-7B-Instruct"

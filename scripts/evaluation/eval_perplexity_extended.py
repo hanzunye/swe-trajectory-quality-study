@@ -48,10 +48,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── 路径配置 ──────────────────────────────────────────────────────────────
-SCRIPT_DIR   = Path(__file__).parent
-EVAL_DATA    = SCRIPT_DIR / "eval_data"
-OUTPUT_DIR   = SCRIPT_DIR / "eval_results"
-OUTPUTS_ROOT = SCRIPT_DIR / "outputs"   # LoRA adapter 默认目录
+WORKSPACE    = Path(os.environ.get("WORKSPACE", Path(__file__).resolve().parents[2]))
+DATA_ROOT    = WORKSPACE / "data"
+EVAL_DATA    = DATA_ROOT / "eval_data"
+OUTPUT_DIR   = DATA_ROOT / "eval_results"
+OUTPUTS_ROOT = WORKSPACE / "outputs"   # LoRA adapter 默认目录
 
 # ── A100 推理配置 ──────────────────────────────────────────────────────────
 BASE_MODEL   = "Qwen/Qwen2.5-Coder-7B-Instruct"
@@ -235,9 +236,14 @@ def load_test_split(split_name: str, tokenizer) -> list[dict]:
 
     if cache_path.exists() and cache_path.stat().st_mtime >= jsonl_path.stat().st_mtime:
         logger.info("[%s] 从缓存加载: %s", split_name, cache_path)
-        samples = torch.load(cache_path, weights_only=False)
-        logger.info("[%s] 缓存命中，%d 条", split_name, len(samples))
-        return samples
+        try:
+            samples = torch.load(cache_path, weights_only=True)
+            if not isinstance(samples, list):
+                raise TypeError(f"unexpected cache type: {type(samples)!r}")
+            logger.info("[%s] 缓存命中，%d 条", split_name, len(samples))
+            return samples
+        except Exception as exc:
+            logger.warning("[%s] 缓存读取失败，重新生成: %s", split_name, exc)
 
     logger.info("[%s] 未找到缓存，开始预处理...", split_name)
     with open(jsonl_path) as f:

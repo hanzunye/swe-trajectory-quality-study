@@ -52,6 +52,7 @@ from builder import (
     build_ablation_no_b3,
     build_ablation_no_c2,
     build_ablation_no_c3,
+    build_b2only_top,
 )
 from subset_visualize import generate_all_plots
 
@@ -66,8 +67,10 @@ logger = logging.getLogger("phase2")
 AVAILABLE_SUBSETS = [
     "Random-500",
     "Random-1000",
+    "Random-2000",
     "TopQ-500",
     "TopQ-1000",
+    "TopQ-2000",
     "ResolvedOnly-500",
     "ResolvedOnly-1000",
     "BottomQ-500",
@@ -77,6 +80,7 @@ AVAILABLE_SUBSETS = [
     "Ablation-NoB3-500",
     "Ablation-NoC2-500",
     "Ablation-NoC3-500",
+    "B2Only-Top500",
 ]
 
 
@@ -199,8 +203,10 @@ def build_single_subset(
     dispatch = {
         "Random-500":               lambda: build_random(df_all, 500, "Random-500"),
         "Random-1000":              lambda: build_random(df_all, 1000, "Random-1000"),
+        "Random-2000":              lambda: build_random(df_all, 2000, "Random-2000"),
         "TopQ-500":                 lambda: build_topq(df_scored, 500, "TopQ-500"),
         "TopQ-1000":                lambda: build_topq(df_scored, 1000, "TopQ-1000"),
+        "TopQ-2000":                lambda: build_topq(df_scored, 2000, "TopQ-2000"),
         "ResolvedOnly-500":         lambda: build_resolvedonly(df_scored, 500, "ResolvedOnly-500"),
         "ResolvedOnly-1000":        lambda: build_resolvedonly(df_scored, 1000, "ResolvedOnly-1000"),
         "BottomQ-500":              lambda: build_bottomq(df_scored),
@@ -210,6 +216,7 @@ def build_single_subset(
         "Ablation-NoB3-500":        lambda: build_ablation_no_b3(df_scored),
         "Ablation-NoC2-500":        lambda: build_ablation_no_c2(df_scored),
         "Ablation-NoC3-500":        lambda: build_ablation_no_c3(df_scored),
+        "B2Only-Top500":            lambda: build_b2only_top(df_scored, 500),
     }
     if name not in dispatch:
         raise ValueError(

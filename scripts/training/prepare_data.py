@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # On cloud (H200): set WORKSPACE=/workspace via env.
 # Locally: defaults to the parent of the scripts/ directory (i.e. Training/).
 _SCRIPT_DIR = Path(__file__).resolve().parent
-WORKSPACE = Path(os.environ.get("WORKSPACE", _SCRIPT_DIR.parent))
+WORKSPACE = Path(os.environ.get("WORKSPACE", _SCRIPT_DIR.parents[1]))
 DATA_DIR = WORKSPACE / "data"
 
 # HF dataset: each subset is a separate config (e.g. "TopQ-500", "Random-500")

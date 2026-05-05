@@ -37,11 +37,28 @@ from collections import Counter
 
 import pandas as pd
 
-from .config import (
-    QUALITY_WEIGHTS, HIERARCHY_WEIGHTS, SUB_DIM_WEIGHTS, MODEL_CONTEXT_WINDOW,
-    GATE_MIN_TRUNCATION_RATIO, B2_MAX_CYCLES, B3_RATIO_CLIP,
-)
-from .analysis import TrajectoryStats
+try:
+    from .scoring_config import (
+        QUALITY_WEIGHTS,
+        HIERARCHY_WEIGHTS,
+        SUB_DIM_WEIGHTS,
+        MODEL_CONTEXT_WINDOW,
+        GATE_MIN_TRUNCATION_RATIO,
+        B2_MAX_CYCLES,
+        B3_RATIO_CLIP,
+    )
+    from .analysis import TrajectoryStats
+except ImportError:
+    from scoring_config import (
+        QUALITY_WEIGHTS,
+        HIERARCHY_WEIGHTS,
+        SUB_DIM_WEIGHTS,
+        MODEL_CONTEXT_WINDOW,
+        GATE_MIN_TRUNCATION_RATIO,
+        B2_MAX_CYCLES,
+        B3_RATIO_CLIP,
+    )
+    from analysis import TrajectoryStats
 
 logger = logging.getLogger(__name__)
 

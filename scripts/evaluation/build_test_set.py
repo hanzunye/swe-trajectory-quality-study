@@ -38,8 +38,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── 路径配置 ──────────────────────────────────────────────────────────────
-WORKSPACE = Path(os.environ.get("WORKSPACE", Path(__file__).parent))
-EVAL_DATA_DIR = WORKSPACE / "eval_data"
+WORKSPACE = Path(os.environ.get("WORKSPACE", Path(__file__).resolve().parents[2]))
+DATA_ROOT = WORKSPACE / "data"
+EVAL_DATA_DIR = DATA_ROOT / "eval_data"
 
 # 数据源
 SUBSET_HF_REPO   = "davongluck/swe-bench-trajectory-quality-subsets"
@@ -282,8 +283,14 @@ def main():
 
     # 自动检测本地打分文件（未手动指定时）
     if not args.scores_file and not args.scores_repo:
-        for candidate in ["trajectory_scored_v3.csv", "quality_scores.csv"]:
-            candidate_path = WORKSPACE / candidate
+        candidate_paths = [
+            DATA_ROOT / "quality_scores" / "full" / "trajectory_scored_v3.csv",
+            DATA_ROOT / "quality_scores" / "trajectory_scored_v3.csv",
+            DATA_ROOT / "quality_scores" / "quality_scores.csv",
+            WORKSPACE / "trajectory_scored_v3.csv",
+            WORKSPACE / "quality_scores.csv",
+        ]
+        for candidate_path in candidate_paths:
             if candidate_path.exists():
                 args.scores_file = str(candidate_path)
                 logger.info("自动检测到本地打分文件: %s", args.scores_file)

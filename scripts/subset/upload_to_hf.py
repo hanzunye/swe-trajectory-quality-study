@@ -22,6 +22,7 @@ Usage:
 import argparse
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -36,7 +37,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger("upload")
 
-OUTPUT_ROOT = Path(__file__).resolve().parent / "output"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_OUTPUT_ROOTS = [
+    Path(__file__).resolve().parent / "output",
+    REPO_ROOT / "scripts" / "output",
+    REPO_ROOT / "data" / "subsets",
+]
 
 # ── HF Dataset Features Schema ───────────────────────────────────────────────
 # Columns present in ALL subsets (trajectory_stats.jsonl base columns)
@@ -81,10 +87,28 @@ FEATURES = Features({**BASE_FEATURES, **V3_FEATURES})
 
 def discover_subsets(output_root: Path) -> list[str]:
     """Find all subset directories that contain trajectories.jsonl."""
+    if not output_root.exists():
+        return []
     return [
         d.name for d in sorted(output_root.iterdir())
         if d.is_dir() and (d / "trajectories.jsonl").exists()
     ]
+
+
+def resolve_output_root(output_root: Path | None = None) -> Path:
+    """Resolve the subset directory, preferring an explicit CLI/env path."""
+    if output_root is not None:
+        return output_root
+
+    env_root = os.environ.get("SUBSET_OUTPUT_ROOT")
+    if env_root:
+        return Path(env_root)
+
+    for candidate in DEFAULT_OUTPUT_ROOTS:
+        if discover_subsets(candidate):
+            return candidate
+
+    return DEFAULT_OUTPUT_ROOTS[-1]
 
 
 def load_subset_data(subset_name: str, output_root: Path) -> tuple[list[dict], dict]:
@@ -204,12 +228,13 @@ def build_dataset_card(repo_id: str, all_metadata: dict[str, dict]) -> str:
         "",
         "| Group | Subsets | Pool |",
         "|-------|---------|------|",
-        "| Random baseline | Random-500, Random-1000 | ALL trajectories |",
-        "| Top quality | TopQ-500, TopQ-1000 | Resolved pool |",
+        "| Random baseline | Random-500, Random-1000, Random-2000 | ALL trajectories |",
+        "| Top quality | TopQ-500, TopQ-1000, TopQ-2000 | Resolved pool |",
         "| Resolved baseline | ResolvedOnly-500, ResolvedOnly-1000 | Resolved pool |",
         "| Bottom quality | BottomQ-500 | Resolved pool (sanity check) |",
         "| Ablation (group) | Ablation-NoEfficiency-500, Ablation-NoStyle-500 | Resolved pool |",
         "| Ablation (dim) | Ablation-NoB2-500, Ablation-NoB3-500, Ablation-NoC2-500, Ablation-NoC3-500 | Resolved pool |",
+        "| Single-dimension | B2Only-Top500 | Resolved pool |",
         "",
         "## Usage",
         "",
@@ -272,6 +297,7 @@ def upload(
     subset_names: list[str] | None = None,
     dry_run: bool = False,
     private: bool = False,
+    output_root: Path | None = None,
 ):
     """
     Upload subsets to Hugging Face Hub.
@@ -282,11 +308,13 @@ def upload(
         dry_run:       Show plan without uploading.
         private:       Create private dataset.
     """
-    available = discover_subsets(OUTPUT_ROOT)
+    output_root = resolve_output_root(output_root)
+    available = discover_subsets(output_root)
     if not available:
-        logger.error("No subsets found in %s", OUTPUT_ROOT)
+        logger.error("No subsets found in %s", output_root)
         sys.exit(1)
 
+    logger.info("Using subset directory: %s", output_root)
     logger.info("Found %d subsets: %s", len(available), available)
 
     if subset_names:
@@ -304,7 +332,7 @@ def upload(
 
     for name in targets:
         logger.info("Loading subset: %s", name)
-        records, metadata = load_subset_data(name, OUTPUT_ROOT)
+        records, metadata = load_subset_data(name, output_root)
         all_metadata[name] = metadata
 
         # Normalise to FEATURES schema
@@ -372,6 +400,10 @@ if __name__ == "__main__":
         "--private", action="store_true",
         help="Create private dataset (default: public)",
     )
+    parser.add_argument(
+        "--output-root", type=Path, default=None,
+        help="Subset root directory (default: auto-detect data/subsets or scripts/output)",
+    )
     args = parser.parse_args()
 
     upload(
@@ -379,4 +411,5 @@ if __name__ == "__main__":
         subset_names=args.only,
         dry_run=args.dry_run,
         private=args.private,
+        output_root=args.output_root,
     )
