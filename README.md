@@ -1,27 +1,65 @@
 # Data Quantity Dominates Quality in LoRA Fine-Tuning for Code Agents
 
-A systematic empirical study of data quality filtering strategies for LoRA fine-tuning of code agent LLMs on the SWE-trajectory dataset.
+[![DOI](https://img.shields.io/badge/DOI-10.1007%2F978--981--92--3492--9__4-0b6bcb)](https://doi.org/10.1007/978-981-92-3492-9_4)
+[![arXiv](https://img.shields.io/badge/arXiv-2607.17205-b31b1b)](https://arxiv.org/abs/2607.17205)
+[![Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-swe--trajectory--subsets-ffcc4d)](https://huggingface.co/datasets/davongluck/swe-trajectory-subsets)
+[![License](https://img.shields.io/badge/Code%20License-MIT-green)](LICENSE)
 
-> **Publication.** This work has been accepted to the **2026 International
-> Conference on Intelligent Computing (ICIC 2026)**, Toronto, Canada
-> (Paper, "A Systematic Evaluation of Trajectory Data Curation for
-> LoRA Fine-Tuning of Code Agents", Yunze Han). Please cite the published
-> proceedings version when referencing this work.
+Official code and experimental artefacts for the ICIC 2026 paper
+**"A Systematic Evaluation of Trajectory Data Curation for LoRA Fine-Tuning of
+Code Agents"** — a systematic empirical study of data quality filtering
+strategies for LoRA fine-tuning of code agent LLMs on the SWE-trajectory dataset.
+
+> **Publication.** Yunze Han. *A Systematic Evaluation of Trajectory Data
+> Curation for LoRA Fine-Tuning of Code Agents.* In **Advanced Intelligent
+> Computing Technology and Applications** (Proceedings of ICIC 2026, the 22nd
+> International Conference on Intelligent Computing, Toronto, ON, Canada,
+> July 22–26, 2026), Lecture Notes in Computer Science, Springer Nature
+> Singapore, pp. 39–50, 2027 (published online 14 July 2026). Oral presentation.
+> DOI: [10.1007/978-981-92-3492-9_4](https://doi.org/10.1007/978-981-92-3492-9_4)
+> · Preprint (author's accepted manuscript): [arXiv:2607.17205](https://arxiv.org/abs/2607.17205)
+
+## Abstract
+
+Supervised fine-tuning (SFT) of open-weight LLMs on expert agent trajectories has
+emerged as a prominent approach to building capable code agents without reliance
+on proprietary models. A central yet underexplored question is how trajectory
+quality and quantity jointly shape model performance. We present a systematic
+empirical study of trajectory data filtering for LoRA fine-tuning of
+Qwen2.5-Coder-7B-Instruct on the SWE-trajectory dataset (67,074 trajectories, of
+which 32,161 are resolved). We propose a two-axis quality scoring framework —
+Efficiency and Style — and evaluate it through 16 controlled experiments spanning
+strategy, scale, and ablation analyses. Since 7B-scale models attain near-zero
+SWE-bench resolve rates, we adopt cross-entropy (CE) loss on held-out
+trajectories as the primary metric, validated via first-action generation: CE
+loss and ROUGE-L are perfectly rank-correlated (Spearman ρ = −1.00), with
+limited-sample evidence supporting but not conclusively establishing this proxy.
+Our results reveal a scale-dependent quality–quantity trade-off: at small scales,
+doubling the dataset (500 → 1,000) yields ~12.7% CE-loss reduction whereas the
+TopQ–Random gap stays < 1% (Mann–Whitney p > 0.10); at 2,000 trajectories this
+same gap widens to 3.6% (p = 0.016). Ablation further identifies error-retry rate
+as the dominant sub-dimension, performing comparably to the full composite
+(Δ < 0.2%). Together, these findings establish trajectory-level quality scoring
+as a viable but scale-sensitive lever for code-agent SFT and offer a
+proxy-validated evaluation protocol for the regime where end-to-end resolve rate
+is statistically infeasible.
 
 ## Key Finding
 
 In the 500–2000 trajectory regime, **data quantity effects (~12.7% relative loss reduction)** substantially exceed **data quality filtering effects (~0.7%, p > 0.10)**. However, the quality gap widens at 2000 samples (3.6% vs 0.7% at 500), suggesting a crossover point may exist at larger scales where quality filtering becomes the dominant factor.
 
-> **Revision Update:** In response to reviewer feedback, we added three supplementary experiments: (A) first-action evaluation for proxy metric validation, (B) scaling extension to 2000 trajectories, and (C) B2-only baseline comparison. See [Supplementary Validation](#supplementary-validation) below.
+> **Note.** Three supplementary experiments were added during peer review and are part of the published version: (A) first-action evaluation for proxy metric validation, (B) scaling extension to 2000 trajectories, and (C) B2-only baseline comparison. See [Supplementary Validation](#supplementary-validation) below.
 
 <p align="center">
   <img src="figures/fig2_loss_comparison.png" width="90%" alt="Loss Comparison">
 </p>
 
-## HuggingFace Resources
+## Paper & Resources
 
 | Resource | Link | Description |
 |----------|------|-------------|
+| Published paper | [doi.org/10.1007/978-981-92-3492-9_4](https://doi.org/10.1007/978-981-92-3492-9_4) | ICIC 2026 proceedings version (Springer LNCS, pp. 39–50) |
+| Preprint | [arxiv.org/abs/2607.17205](https://arxiv.org/abs/2607.17205) | Author's accepted manuscript (12 pages, open access) |
 | Quality-Scored Subsets | [huggingface.co/datasets/davongluck/swe-trajectory-subsets](https://huggingface.co/datasets/davongluck/swe-trajectory-subsets) | 16 curated training subsets with quality scores |
 
 
@@ -69,7 +107,7 @@ Block 4 — Supplementary (3 experiments, added in revision)
 |----------------------|----------|-------------|
 | CE Loss is a valid proxy | Spearman ρ = −1.00 (CE Loss vs ROUGE-L) | p < 0.001 |
 | Scaling continues to 2000 | Random −18.3%, TopQ −20.7% (500→2000) | Diminishing but sustained |
-| Quality-quantity crossover | TopQ−Random gap: 0.7%@500 → 3.6%@2000 | 4× widening |
+| Quality-quantity crossover | TopQ−Random gap: 0.7%@500 → 3.6%@2000 | 4× widening (p = 0.016 @2000) |
 | B2 ≈ Composite @500 | CE Loss 0.4714 vs 0.4704 (Δ = 0.2%) | Not significant |
 
 <p align="center">
@@ -292,19 +330,39 @@ swe-trajectory-quality-study/
 
 ## Citation
 
-If you use this repository or its results, please cite the ICIC 2026
-proceedings version (replace page numbers and DOI with the final values once
-the proceedings are released):
+If you use this repository or its results, please cite the published ICIC 2026
+proceedings version:
 
 ```bibtex
-@inproceedings{han2026trajectory,
+@InProceedings{han2027trajectory,
+  author    = {Han, Yunze},
+  editor    = {Huang, De-Shuang and Li, Bo and Zhang, Qinhu and Bao, Wenzheng},
   title     = {A Systematic Evaluation of Trajectory Data Curation for
                LoRA Fine-Tuning of Code Agents},
-  author    = {Han, Yunze},
-  booktitle = {Proceedings of the 2026 International Conference on
-               Intelligent Computing (ICIC 2026)},
-  address   = {Toronto, Canada},
-  year      = {2026},
+  booktitle = {Advanced Intelligent Computing Technology and Applications},
+  series    = {Lecture Notes in Computer Science},
+  publisher = {Springer Nature Singapore},
+  address   = {Singapore},
+  pages     = {39--50},
+  year      = {2027},
+  isbn      = {978-981-92-3492-9},
+  doi       = {10.1007/978-981-92-3492-9_4},
+}
+```
+
+The proceedings carry a 2027 imprint year; the chapter was published online on
+14 July 2026. If you need the open-access preprint instead:
+
+```bibtex
+@misc{han2026trajectoryarxiv,
+  author        = {Han, Yunze},
+  title         = {A Systematic Evaluation of Trajectory Data Curation for
+                   LoRA Fine-Tuning of Code Agents},
+  year          = {2026},
+  eprint        = {2607.17205},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  doi           = {10.48550/arXiv.2607.17205},
 }
 ```
 
@@ -312,5 +370,7 @@ the proceedings are released):
 
 The code and experimental artefacts in this repository are released under the
 MIT License — see [LICENSE](LICENSE) for details. The published paper itself
-is covered by the ICIC 2026 / Springer LNCS proceedings copyright; please
-refer to the published version for the authoritative copyright notice.
+is © Springer Nature Singapore Pte Ltd.; please refer to the
+[published version](https://doi.org/10.1007/978-981-92-3492-9_4) for the
+authoritative copyright notice. The author's accepted manuscript is available
+on [arXiv](https://arxiv.org/abs/2607.17205).
